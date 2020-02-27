@@ -22,9 +22,9 @@ addons:
 
 before_script:
   - mkdir -p $HOME/graalvm && cd $HOME/graalvm
-  - wget https://github.com/graalvm/graalvm-ce-builds/releases/download/vm-19.3.0/graalvm-ce-java11-linux-amd64-19.3.0.tar.gz
-  - tar xf graalvm-ce-java11-linux-amd64-19.3.0.tar.gz && cd $TRAVIS_BUILD_DIR
-  - export GRAALVM_HOME=$HOME/graalvm/graalvm-ce-java11-19.3.0
+  - wget https://download2.gluonhq.com/substrate/graalvm/graalvm-svm-linux-20.1.0-ea+24.zip
+  - unzip graalvm-svm-linux-20.1.0-ea+24.zip && cd $TRAVIS_BUILD_DIR
+  - export GRAALVM_HOME=$HOME/graalvm/graalvm-svm-linux-20.1.0-ea+24
   - ${GRAALVM_HOME}/bin/gu install native-image
   - echo $JAVA_OPTS
 
