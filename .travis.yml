@@ -19,13 +19,15 @@ addons:
       - build-essential
       - libgtk-3-dev
       - libxtst-dev
+      - libavcodec-dev
+      - libavformat-dev
+      - libasound2-dev
 
 before_script:
   - mkdir -p $HOME/graalvm && cd $HOME/graalvm
   - wget https://download2.gluonhq.com/substrate/graalvm/graalvm-svm-linux-20.1.0-ea+24.zip
   - unzip graalvm-svm-linux-20.1.0-ea+24.zip && cd $TRAVIS_BUILD_DIR
   - export GRAALVM_HOME=$HOME/graalvm/graalvm-svm-linux-20.1.0-ea+24
-  - ${GRAALVM_HOME}/bin/gu install native-image
   - echo $JAVA_OPTS
 
 install: true
