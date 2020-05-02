@@ -86,12 +86,15 @@ public class ChatPresenter extends GluonPresenter<GluonChat> {
 
         setupAddButton();
 
-        if (Platform.isIOS()) {
-            // style classes
-            messageEditor.getStyleClass().add("ios");
-            chatList.getStyleClass().add("ios");
-            if (DisplayService.create().map(DisplayService::hasNotch).orElse(false)) {
-                bottomPane.getStyleClass().add("notch");
+        if (Platform.isIOS() || Platform.isAndroid()) {
+
+            if (Platform.isIOS()) {
+                // style classes
+                messageEditor.getStyleClass().add("ios");
+                chatList.getStyleClass().add("ios");
+                if (DisplayService.create().map(DisplayService::hasNotch).orElse(false)) {
+                    bottomPane.getStyleClass().add("notch");
+                }
             }
 
             // allow dismissing the soft keyboard when tapping outside textArea

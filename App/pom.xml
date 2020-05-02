@@ -16,13 +16,6 @@
 <!--        <form.factor>tablet</form.factor>-->
     </properties>
 
-    <pluginRepositories>
-        <pluginRepository>
-            <id>Gluon Releases</id>
-            <url>https://nexus.gluonhq.com/nexus/content/repositories/releases/</url>
-        </pluginRepository>
-    </pluginRepositories>
-
     <build>
         <plugins>
             <plugin>
@@ -283,13 +276,11 @@
                     <groupId>com.gluonhq.attach</groupId>
                     <artifactId>orientation</artifactId>
                     <version>${attachVersion}</version>
-                    <classifier>ios</classifier>
                 </dependency>
                 <dependency>
                     <groupId>com.gluonhq.attach</groupId>
                     <artifactId>position</artifactId>
                     <version>${attachVersion}</version>
-                    <classifier>ios</classifier>
                 </dependency>
             </dependencies>
         </profile>
@@ -304,13 +295,11 @@
                     <groupId>com.gluonhq.attach</groupId>
                     <artifactId>orientation</artifactId>
                     <version>${attachVersion}</version>
-                    <classifier>android</classifier>
                 </dependency>
                 <dependency>
                     <groupId>com.gluonhq.attach</groupId>
                     <artifactId>position</artifactId>
                     <version>${attachVersion}</version>
-                    <classifier>android</classifier>
                 </dependency>
             </dependencies>
         </profile>

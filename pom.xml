@@ -25,7 +25,7 @@
 
         <glistenVersion>6.0.4</glistenVersion>
         <glistenAfterburnerVersion>2.0.4</glistenAfterburnerVersion>
-        <attachVersion>4.0.7</attachVersion>
+        <attachVersion>4.0.8-SNAPSHOT</attachVersion>
         <mapsVersion>2.0.0-ea+3</mapsVersion>
         <connectVersion>2.0.1</connectVersion>
         <javafxVersion>15-ea+3</javafxVersion>
@@ -42,6 +42,10 @@
         <repository>
             <id>Gluon Snapshots</id>
             <url>https://nexus.gluonhq.com/nexus/content/repositories/public-snapshots</url>
+        </repository>
+        <repository>
+            <id>Snapshots</id>
+            <url>https://oss.sonatype.org/content/repositories/snapshots</url>
         </repository>
     </repositories>
 
