@@ -88,10 +88,10 @@ public class ChatPresenter extends GluonPresenter<GluonChat> {
 
         if (Platform.isIOS() || Platform.isAndroid()) {
 
+            chatList.getStyleClass().add("mobile");
             if (Platform.isIOS()) {
                 // style classes
                 messageEditor.getStyleClass().add("ios");
-                chatList.getStyleClass().add("ios");
                 if (DisplayService.create().map(DisplayService::hasNotch).orElse(false)) {
                     bottomPane.getStyleClass().add("notch");
                 }

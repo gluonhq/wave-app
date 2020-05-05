@@ -71,7 +71,7 @@
     -fx-padding: 0px;
 }
 
-.chat-list-view.chat-list.ios > .virtual-flow > .scroll-bar:vertical {
+.chat-list-view.chat-list.mobile > .virtual-flow > .scroll-bar:vertical {
     -fx-translate-x: 8;
 }
 
