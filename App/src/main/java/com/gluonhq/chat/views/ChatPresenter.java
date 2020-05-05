@@ -128,7 +128,7 @@ public class ChatPresenter extends GluonPresenter<GluonChat> {
     private void createSortList(GluonObservableList<ChatMessage> messages) {
         this.messages = messages;
         SortedList<ChatMessage> sortedList = new SortedList<>(messages);
-        sortedList.setComparator(Comparator.comparing(ChatMessage::getTime));
+        sortedList.setComparator(Comparator.comparing(ChatMessage::getEpochMillis));
         chatList.setItems(sortedList);
     }
 

@@ -27,7 +27,10 @@ import javafx.scene.text.Text;
 import javafx.scene.text.TextFlow;
 import javafx.util.Duration;
 
-//import java.time.format.DateTimeFormatter;
+import java.time.Instant;
+import java.time.LocalDateTime;
+import java.time.ZoneId;
+import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
@@ -40,7 +43,7 @@ import static com.gluonhq.chat.service.ImageUtils.*;
 
 class MessageCell extends CharmListCell<ChatMessage> {
 
-//    private static final DateTimeFormatter formatter = DateTimeFormatter.ofPattern("MMM dd HH:mm");
+    private static final DateTimeFormatter formatter = DateTimeFormatter.ofPattern("MMM dd HH:mm");
     private static final Insets meInsets = new Insets(10, 0, 10, 0);
     private static final Insets notMeInsets = new Insets(10, 0, 10, 0);
     private static final Image clockImage = new Image( "/clock.png");
@@ -129,7 +132,7 @@ class MessageCell extends CharmListCell<ChatMessage> {
             BorderPane.setMargin(message, isMe ? meInsets : notMeInsets);
 
             if (item.getTime() != null) {
-                date.setText(item.getFormattedTime());
+                date.setText(toLocalDateTime(item.getEpochMillis()));
                 status.setContentDisplay(ContentDisplay.TEXT_ONLY);
                 status.setText(resources.getString("label.status.check")); // check mark if read
             } else {
@@ -287,5 +290,10 @@ class MessageCell extends CharmListCell<ChatMessage> {
         });
         node.addEventHandler(MouseEvent.MOUSE_RELEASED, event -> holdTimer.stop());
         node.addEventHandler(MouseEvent.DRAG_DETECTED, event -> holdTimer.stop());
+    }
+
+    private String toLocalDateTime(long epochMillis) {
+        LocalDateTime temporal = Instant.ofEpochMilli(epochMillis).atZone(ZoneId.systemDefault()).toLocalDateTime();
+        return formatter.format(temporal);
     }
 }

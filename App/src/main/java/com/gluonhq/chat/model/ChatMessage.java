@@ -1,7 +1,10 @@
 package com.gluonhq.chat.model;
 
 import java.time.LocalDateTime;
+import java.time.ZoneId;
+import java.time.ZonedDateTime;
 import java.util.Objects;
+import java.util.TimeZone;
 import java.util.UUID;
 
 public class ChatMessage {
@@ -10,6 +13,7 @@ public class ChatMessage {
     String message;
     LocalDateTime time;
     String author;
+    String timeZone;
 
     public ChatMessage() {
     }
@@ -19,6 +23,7 @@ public class ChatMessage {
         this.message = message;
         this.time = LocalDateTime.now();
         this.author = author;
+        this.timeZone = TimeZone.getDefault().getID();
     }
 
     public String getMessage() {
@@ -35,6 +40,14 @@ public class ChatMessage {
 
     public String getId() {
         return id;
+    }
+
+    public String getTimeZone() {
+        return timeZone;
+    }
+
+    public long getEpochMillis() {
+        return ZonedDateTime.of(time, ZoneId.of(timeZone)).toEpochSecond() * 1000;
     }
 
     @Override
@@ -56,12 +69,8 @@ public class ChatMessage {
                 "id='" + id + '\'' +
                 ", message='" + message + '\'' +
                 ", time=" + time +
+                ", timeZone=" + timeZone +
                 ", author=" + author +
                 '}';
-    }
-
-    public String getFormattedTime() {
-        return getTime().toLocalDate().toString() + " " +
-                String.format("%02d:%02d", getTime().getHour(),getTime().getMinute());
     }
 }
