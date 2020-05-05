@@ -16,8 +16,11 @@ import javafx.scene.layout.Pane;
 
 import javax.inject.Inject;
 import java.util.ResourceBundle;
+import java.util.regex.Pattern;
 
 public class LoginPresenter extends GluonPresenter<GluonChat> {
+
+    private final static Pattern PATTERN = Pattern.compile("^[a-zA-Z0-9._\\-]{2,}$");
 
     @FXML private View loginView;
 
@@ -68,8 +71,7 @@ public class LoginPresenter extends GluonPresenter<GluonChat> {
         lastName.setOnAction(e -> button.requestFocus());
 
         button.disableProperty().bind(Bindings.createBooleanBinding(() ->
-                        firstName.getText().isEmpty() || firstName.getText().length() < 2 ||
-                        lastName.getText().isEmpty() || lastName.getText().length() < 2,
+                        !(validate(firstName.getText()) && validate(lastName.getText())),
                 firstName.textProperty(), lastName.textProperty()));
         button.setOnAction(e -> {
             if (service.saveUser(firstName.getText() + " " + lastName.getText())) {
@@ -80,5 +82,9 @@ public class LoginPresenter extends GluonPresenter<GluonChat> {
                 alert.showAndWait();
             }
         });
+    }
+
+    private static boolean validate(String text) {
+        return PATTERN.matcher(text).matches();
     }
 }

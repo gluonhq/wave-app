@@ -18,6 +18,7 @@ import javafx.scene.image.Image;
 
 import javax.annotation.PostConstruct;
 import java.util.Arrays;
+import java.util.Locale;
 import java.util.Objects;
 import java.util.function.Consumer;
 import java.util.logging.Level;
@@ -149,7 +150,7 @@ public class Service {
                     .map(String::trim)
                     .filter(s -> s.length() > 0)
                     .map(s -> s.substring(0, 1))
-                    .map(String::toUpperCase)
+                    .map(s1 -> s1.toUpperCase(Locale.ROOT))
                     .collect(Collectors.joining());
         } else {
             return "";
