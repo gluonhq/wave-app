@@ -122,7 +122,6 @@ public class ChatPresenter extends GluonPresenter<GluonChat> {
                 }
             });
         }
-
     }
 
     private void createSortList(GluonObservableList<ChatMessage> messages) {
@@ -152,5 +151,4 @@ public class ChatPresenter extends GluonPresenter<GluonChat> {
         PlusPopupView popup = new PlusPopupView(addButton, resources);
         addButton.setOnAction(event -> popup.show());
     }
-
 }
