@@ -11,6 +11,7 @@
     -chat-light-color : white;
     -chat-medium-color: #d3e4eb;
     -chat-dark-color  : #12a0e3;
+    -chat-editor-background : white;
 
     -primary-swatch-500: -chat-accent;
 
@@ -56,7 +57,7 @@
 
 .chat-text-editor {
     -fx-background-radius: 1em;
-    -fx-background-color: -chat-light-color;
+    -fx-background-color: -chat-editor-background ;
     -fx-font-size: 1em;
     -fx-text-fill: -chart-dark-text-fill;
     -fx-prompt-text-fill: derive(-chart-dark-text-fill, 50%);

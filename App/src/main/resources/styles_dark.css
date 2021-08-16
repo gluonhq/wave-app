@@ -1,6 +1,6 @@
 @import "styles.css";
 
-
+/** TODO: Needs better naming **/
 .root {
     -chat-accent      : #607387;
     -chat-light-color : #ece9e9;
@@ -15,7 +15,7 @@
 
     -fx-font-size: 12pt;
 
-    -unread-label: #f17835;
-    -unread-color: #f17835cc;
-    -unread-color-hover: #df502dcc;
+    -unread-label: #4d2007;
+    -unread-color: rgba(119, 45, 4, 0.8);
+    -unread-color-hover: rgba(147, 32, 4, 0.8);
 }

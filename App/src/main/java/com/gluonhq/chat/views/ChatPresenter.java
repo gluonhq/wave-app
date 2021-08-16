@@ -77,7 +77,7 @@ public class ChatPresenter extends GluonPresenter<GluonChat> {
         sendButton.setOnAction(e -> {
             String text = messageEditor.getText().trim();
             if (!text.isEmpty()) {
-                var message = new ChatMessage(text, service.getName().get());
+                var message = new ChatMessage(text, service.getName());
                 messages.add(message);
                 messageEditor.clear();
                 addButton.requestFocus();

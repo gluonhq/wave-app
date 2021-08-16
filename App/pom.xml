@@ -81,7 +81,7 @@
                         <item>logging.properties</item>
                     </resourcesList>
                     <reflectionList>
-                        <list>com.gluonhq.chat.service.Service</list>
+                        <list>com.gluonhq.chat.service.CloudlinkService</list>
                         <list>com.gluonhq.chat.model.ChatMessage</list>
                         <list>com.gluonhq.chat.model.ChatImage</list>
                         <list>com.gluonhq.chat.views.ChatPresenter</list>

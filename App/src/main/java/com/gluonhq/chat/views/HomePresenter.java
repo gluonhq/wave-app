@@ -10,7 +10,6 @@ import com.gluonhq.chat.GluonChat;
 import com.gluonhq.chat.service.Service;
 import javafx.fxml.FXML;
 import javafx.geometry.Orientation;
-import javafx.stage.Stage;
 
 import javax.inject.Inject;
 
@@ -30,7 +29,7 @@ public class HomePresenter extends GluonPresenter<GluonChat> {
 
         Orientation orientation = OrientationService.create()
                 .flatMap(OrientationService::getOrientation)
-                .orElse(Orientation.VERTICAL);
+                .orElse(Orientation.HORIZONTAL);
 
         homeView.showingProperty().addListener((obs, ov, nv) -> {
             if (nv) {
@@ -53,11 +52,13 @@ public class HomePresenter extends GluonPresenter<GluonChat> {
         if (/*tablet && */orientation == Orientation.HORIZONTAL) {
             AppViewManager.LANDSCAPE_VIEW.switchView()
                     .ifPresent(p -> ((LandscapePresenter) p).loadLandscapeView());
-            ((Stage) MobileApplication.getInstance().getGlassPane().getScene().getWindow()).setMaximized(true);
+            MobileApplication.getInstance().getGlassPane().getScene().getWindow().setWidth(800);
+            MobileApplication.getInstance().getGlassPane().getScene().getWindow().setHeight(600);
         } else {
             AppViewManager.PORTRAIT_VIEW.switchView()
                     .ifPresent(p -> ((PortraitPresenter) p).loadChat());
-            ((Stage) MobileApplication.getInstance().getGlassPane().getScene().getWindow()).setMaximized(false);
+            MobileApplication.getInstance().getGlassPane().getScene().getWindow().setWidth(350);
+            MobileApplication.getInstance().getGlassPane().getScene().getWindow().setHeight(600);
         }
     }
 }

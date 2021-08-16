@@ -31,12 +31,12 @@ public class PortraitPresenter extends GluonPresenter<GluonChat> {
             Button chat = MaterialDesignIcon.CHAT.button(e -> loadChat());
             chat.visibleProperty().bind(users.visibleProperty().not());
             chat.managedProperty().bind(chat.visibleProperty());
-            
+
             ToggleButton theme = new ToggleButton();
             theme.getStyleClass().addAll("icon-toggle", "chat-button");
             theme.setGraphic(MaterialDesignIcon.LIGHTBULB_OUTLINE.graphic());
             theme.setContentDisplay(ContentDisplay.GRAPHIC_ONLY);
-            
+
             theme.selectedProperty().addListener((observable, oldValue, newValue) -> {
                 final String darkStyleSheet = PortraitPresenter.class.getResource("/styles_dark.css").toExternalForm();
                 if (newValue) {
