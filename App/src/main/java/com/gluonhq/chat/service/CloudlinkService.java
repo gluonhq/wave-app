@@ -12,6 +12,8 @@ import com.gluonhq.connect.GluonObservableObject;
 import com.gluonhq.connect.provider.DataProvider;
 import javafx.beans.InvalidationListener;
 import javafx.beans.Observable;
+import javafx.beans.property.ObjectProperty;
+import javafx.collections.ObservableList;
 
 import javax.annotation.PostConstruct;
 import java.util.function.Consumer;
@@ -58,7 +60,7 @@ public class CloudlinkService implements Service {
         return getMessages(null);
     }
 
-    public GluonObservableList<ChatMessage> getMessages(Consumer<GluonObservableList<ChatMessage>> consumer) {
+    public GluonObservableList<ChatMessage> getMessages(Consumer<ObservableList<ChatMessage>> consumer) {
         if (messages == null) {
             messages = DataProvider
                     .retrieveList(dataClient.createListDataReader(MESSAGES, ChatMessage.class));
@@ -87,7 +89,7 @@ public class CloudlinkService implements Service {
         return getName(null);
     }
 
-    public String getName(Consumer<GluonObservableObject<String>> consumer) {
+    public String getName(Consumer<ObjectProperty<String>> consumer) {
         processConsumer(name, consumer);
         return name.getValue();
     }

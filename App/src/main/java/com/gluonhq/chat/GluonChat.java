@@ -5,7 +5,6 @@ import com.gluonhq.attach.lifecycle.LifecycleService;
 import com.gluonhq.charm.glisten.afterburner.GluonInstanceProvider;
 import com.gluonhq.charm.glisten.application.MobileApplication;
 import com.gluonhq.charm.glisten.visual.Swatch;
-import com.gluonhq.chat.service.CloudlinkService;
 import com.gluonhq.chat.service.DummyService;
 import com.gluonhq.chat.service.Service;
 import com.gluonhq.chat.views.AppViewManager;
@@ -31,7 +30,8 @@ public class GluonChat extends MobileApplication {
     }
 
     private static final GluonInstanceProvider instanceSupplier = new GluonInstanceProvider() {{
-        bindProvider(Service.class, CloudlinkService::new);
+        // bindProvider(Service.class, CloudlinkService::new);
+        bindProvider(Service.class, DummyService::new);
 
         Injector.setInstanceSupplier(this);
     }};

@@ -2,8 +2,8 @@ package com.gluonhq.chat.service;
 
 import com.gluonhq.chat.model.ChatImage;
 import com.gluonhq.chat.model.ChatMessage;
-import com.gluonhq.connect.GluonObservableList;
-import com.gluonhq.connect.GluonObservableObject;
+import javafx.beans.property.ObjectProperty;
+import javafx.beans.property.SimpleObjectProperty;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import javafx.scene.image.Image;
@@ -22,8 +22,9 @@ public class DummyService implements Service {
     }
 
     @Override
-    public GluonObservableList<ChatMessage> getMessages(Consumer<GluonObservableList<ChatMessage>> consumer) {
-        return null;
+    public ObservableList<ChatMessage> getMessages(Consumer<ObservableList<ChatMessage>> consumer) {
+        consumer.accept(getMessages());
+        return getMessages();
     }
 
     @Override
@@ -52,7 +53,8 @@ public class DummyService implements Service {
     }
 
     @Override
-    public String getName(Consumer<GluonObservableObject<String>> consumer) {
+    public String getName(Consumer<ObjectProperty<String>> consumer) {
+        consumer.accept(new SimpleObjectProperty<>("name"));
         return getName();
     }
 }

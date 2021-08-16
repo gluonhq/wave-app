@@ -10,12 +10,11 @@ import com.gluonhq.chat.chatlistview.ChatListView;
 import com.gluonhq.chat.model.ChatMessage;
 import com.gluonhq.chat.service.Service;
 import com.gluonhq.chat.views.helper.PlusPopupView;
-import com.gluonhq.connect.GluonObservableList;
-import com.gluonhq.connect.GluonObservableObject;
-//import com.gluonhq.emoji.control.EmojiTextArea;
 import javafx.animation.PauseTransition;
 import javafx.beans.InvalidationListener;
 import javafx.beans.Observable;
+import javafx.beans.property.ObjectProperty;
+import javafx.collections.ObservableList;
 import javafx.collections.transformation.SortedList;
 import javafx.fxml.FXML;
 import javafx.scene.control.Button;
@@ -30,6 +29,8 @@ import javafx.util.Duration;
 import javax.inject.Inject;
 import java.util.Comparator;
 import java.util.ResourceBundle;
+
+//import com.gluonhq.emoji.control.EmojiTextArea;
 
 // TODO Show user images when available
 
@@ -47,7 +48,7 @@ public class ChatPresenter extends GluonPresenter<GluonChat> {
     @FXML private ResourceBundle resources;
 
     private ChatListView<ChatMessage> chatList;
-    private GluonObservableList<ChatMessage> messages;
+    private ObservableList<ChatMessage> messages;
     private PauseTransition pause;
 
     public void initialize() {
@@ -124,14 +125,14 @@ public class ChatPresenter extends GluonPresenter<GluonChat> {
         }
     }
 
-    private void createSortList(GluonObservableList<ChatMessage> messages) {
+    private void createSortList(ObservableList<ChatMessage> messages) {
         this.messages = messages;
         SortedList<ChatMessage> sortedList = new SortedList<>(messages);
         sortedList.setComparator(Comparator.comparing(ChatMessage::getTime));
         chatList.setItems(sortedList);
     }
 
-    private void setCellFactory(GluonObservableObject<String> name) {
+    private void setCellFactory(ObjectProperty<String> name) {
         chatList.setCellFactory(listView -> new MessageCell(name.get()));
     }
 

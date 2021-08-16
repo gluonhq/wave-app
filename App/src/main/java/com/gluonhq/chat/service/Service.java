@@ -2,8 +2,7 @@ package com.gluonhq.chat.service;
 
 import com.gluonhq.chat.model.ChatImage;
 import com.gluonhq.chat.model.ChatMessage;
-import com.gluonhq.connect.GluonObservableList;
-import com.gluonhq.connect.GluonObservableObject;
+import javafx.beans.property.ObjectProperty;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import javafx.scene.image.Image;
@@ -19,7 +18,7 @@ public interface Service {
 
     ObservableList<ChatMessage> getMessages();
 
-    ObservableList<ChatMessage> getMessages(Consumer<GluonObservableList<ChatMessage>> consumer);
+    ObservableList<ChatMessage> getMessages(Consumer<ObservableList<ChatMessage>> consumer);
 
     ObservableList<ChatImage> getImages();
 
@@ -27,9 +26,9 @@ public interface Service {
 
     String getName();
 
-    String getName(Consumer<GluonObservableObject<String>> consumer);
+    String getName(Consumer<ObjectProperty<String>> consumer);
 
-    default ObservableList<String> getNames(GluonObservableList<ChatMessage> o) {
+    default ObservableList<String> getNames(ObservableList<ChatMessage> o) {
         return FXCollections.observableArrayList(
                 o.stream()
                         .map(ChatMessage::getAuthor)
