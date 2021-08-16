@@ -45,40 +45,13 @@ public class GluonChat extends MobileApplication {
     public void postInit(Scene scene) {
         Swatch.RED.assignTo(scene);
 
-        /*String deviceFactorSuffix = Services.get(DeviceService.class)
-                .map(s -> {
-                    switch (s.getPlatform()) {
-                        case "Android":
-                            return "android";
-                    }
-                    return "";
-                })
-                .orElse("");
-
-        String formFactorSuffix = Services.get(DisplayService.class)
-                .map(s -> s.isTablet() ? "_tablet" : "")
-                .orElse("");
-
-        String stylesheetName = String.format("style_%s%s%s.css",
-                Platform.getCurrent().name().toLowerCase(Locale.ROOT),
-                deviceFactorSuffix,
-                formFactorSuffix);
-        scene.getStylesheets().add(GluonChat.class.getResource("/"+ stylesheetName).toExternalForm());*/
-        
-        /*scene.widthProperty().addListener((observable, oldValue, newValue) -> {
-            final String android_stylesheet = GluonChat.class.getResource("/styles_android.css").toExternalForm();
-            if (newValue.doubleValue() > 400) {
-                scene.getStylesheets().remove(android_stylesheet);
-            } else {
-                scene.getStylesheets().add(android_stylesheet);
-            }
-        });*/
         scene.getStylesheets().add(GluonChat.class.getResource("/styles.css").toExternalForm());
         ((Stage) scene.getWindow()).getIcons().add(new Image(GluonChat.class.getResourceAsStream("/icon.png")));
 
         scene.getWindow().setOnCloseRequest(e ->
                 LifecycleService.create().ifPresent(LifecycleService::shutdown));
 
+        // TODO: Remove
         //ScenicView.show(scene);
     }
 

@@ -50,14 +50,6 @@ public class PortraitPresenter extends GluonPresenter<GluonChat> {
         });
     }
 
-    /*protected void updateTheme(String oldStylesheet) {
-        final List<String> stylesheets = portraitView.getStylesheets();
-        if (oldStylesheet != null) {
-            stylesheets.remove(oldStylesheet);
-        }
-        stylesheets.add(toolStylesheet);
-    }*/
-
     void loadChat() {
         MobileApplication.getInstance().retrieveView(AppViewManager.CHAT_VIEW.getId())
                 .ifPresentOrElse(portraitView::setCenter,

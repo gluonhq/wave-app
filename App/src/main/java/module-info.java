@@ -1,8 +1,9 @@
 module com.gluonhq.chat {
     requires javafx.controls;
     requires javafx.fxml;
-    requires javafx.swing;
-    requires javafx.web;
+    // TODO: Remove
+    /*requires javafx.swing;
+    requires javafx.web;*/
 
     requires com.gluonhq.charm.glisten;
     requires com.gluonhq.cloudlink.client;
@@ -24,7 +25,8 @@ module com.gluonhq.chat {
 //    requires com.gluonhq.emoji.popup;
 //    requires com.gluonhq.emoji.control;
     requires java.sql;
-    requires org.scenicview.scenicview;
+    // TODO: Remove
+    // requires org.scenicview.scenicview;
 
     requires com.gluonhq.glisten.afterburner;
     requires java.annotation;
