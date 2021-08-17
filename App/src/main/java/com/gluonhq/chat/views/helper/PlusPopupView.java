@@ -83,6 +83,7 @@ public class PlusPopupView extends PopupView {
             }
         });
         HBox imageBox = new HBox(icon, upload);
+        imageBox.setDisable(Platform.isAndroid());
         imageBox.getStyleClass().add("item-box");
 
         Label location = new Label(resources.getString("popup.location.icon"));
