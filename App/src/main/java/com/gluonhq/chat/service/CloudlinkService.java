@@ -16,7 +16,6 @@ import javafx.beans.Observable;
 import javafx.beans.property.ObjectProperty;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
-import javafx.scene.image.Image;
 
 import javax.annotation.PostConstruct;
 import java.util.function.Consumer;
