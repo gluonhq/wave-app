@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import com.gluonhq.charm.glisten.control.CharmListView?>
+<?import javafx.scene.layout.BorderPane?>
+<?import com.gluonhq.charm.glisten.mvc.View?>
+
+<?import com.gluonhq.charm.glisten.control.TextField?>
+<?import javafx.scene.layout.HBox?>
+<?import com.gluonhq.charm.glisten.control.Icon?>
+<View fx:id="channels" xmlns="http://javafx.com/javafx/11.0.1" xmlns:fx="http://javafx.com/fxml/1" fx:controller="com.gluonhq.chat.views.ChannelPresenter">
+    <top>
+        <HBox fx:id="searchBox" styleClass="search-box">
+            <Icon content="SEARCH" />
+            <TextField fx:id="search"/>
+        </HBox>
+        
+    </top>
+    <center>
+        <CharmListView fx:id="channelList" styleClass="channel-list" BorderPane.alignment="CENTER" />
+    </center>
+</View>

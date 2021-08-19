@@ -10,7 +10,7 @@ import com.gluonhq.chat.model.ChatMessage;
 import com.gluonhq.chat.service.Service;
 import com.gluonhq.chat.views.AppViewManager;
 import com.gluonhq.chat.views.MapsPresenter;
-import com.gluonhq.connect.GluonObservableList;
+import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import javafx.scene.Node;
 import javafx.scene.control.Label;
@@ -24,9 +24,7 @@ import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.util.ResourceBundle;
 
-import static com.gluonhq.chat.service.ImageUtils.DEFAULT_POSITION;
-import static com.gluonhq.chat.service.ImageUtils.IMAGE_PREFIX;
-import static com.gluonhq.chat.service.ImageUtils.LATLON;
+import static com.gluonhq.chat.service.ImageUtils.*;
 
 public class PlusPopupView extends PopupView {
 
@@ -43,7 +41,10 @@ public class PlusPopupView extends PopupView {
         getStylesheets().add(PlusPopupView.class.getResource("plus.css").toExternalForm());
 
         service = Injector.instantiateModelOrService(Service.class);
-        messages = service.getMessages();
+        
+        //TODO: FixME
+        // messages = service.getMessages(service.loggedUser());
+        messages = FXCollections.observableArrayList();
         initialize();
     }
 
@@ -64,7 +65,7 @@ public class PlusPopupView extends PopupView {
                         Image image = new Image(new FileInputStream(file));
                         String id = service.addImage(file.getName() + "-" + System.currentTimeMillis(), image);
                         if (id != null) {
-                            var message = new ChatMessage(id, service.getName());
+                            var message = new ChatMessage(id, service.loggedUser());
                             messages.add(message);
                         }
                     } catch (FileNotFoundException e1) {
@@ -77,7 +78,7 @@ public class PlusPopupView extends PopupView {
                                 .ifPresent(image -> {
                                     String id = service.addImage("photo" + "-" + System.currentTimeMillis(), image);
                                     if (id != null) {
-                                        var message = new ChatMessage(id, service.getName());
+                                        var message = new ChatMessage(id, service.loggedUser());
                                         messages.add(message);
                                     }
                                 }));
@@ -118,11 +119,11 @@ public class PlusPopupView extends PopupView {
     private void sendLocation(Position newPosition) {
         Position position = newPosition == null ? DEFAULT_POSITION : newPosition;
 
-        String name = service.getName();
+        String name = service.loggedUser().toString();
         String initials = Service.getInitials(name);
 
         AppViewManager.MAPS_VIEW.switchView().ifPresent(p ->
-                ((MapsPresenter) p).flyTo(position, name, initials, e -> {
+                ((MapsPresenter) p).flyTo(position, service.loggedUser(), initials, e -> {
                     messages.removeIf(m -> m.getMessage().startsWith(IMAGE_PREFIX + LATLON + initials));
                     service.getImages().removeIf(m -> m.getId().startsWith(LATLON + initials));
                     messages.add(e);

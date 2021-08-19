@@ -4,21 +4,21 @@ import java.time.LocalDateTime;
 import java.util.Objects;
 import java.util.UUID;
 
-public class ChatMessage {
+public class ChatMessage extends Searchable {
 
     String id;
     String message;
     LocalDateTime time;
-    String author;
+    User user;
 
     public ChatMessage() {
     }
 
-    public ChatMessage(String message, String author) {
+    public ChatMessage(String message, User user) {
         this.id = UUID.randomUUID().toString();
         this.message = message;
         this.time = LocalDateTime.now();
-        this.author = author;
+        this.user = user;
     }
 
     public String getMessage() {
@@ -29,8 +29,8 @@ public class ChatMessage {
         return time;
     }
 
-    public String getAuthor() {
-        return author;
+    public User getUser() {
+        return user;
     }
 
     public String getId() {
@@ -56,8 +56,13 @@ public class ChatMessage {
                 "id='" + id + '\'' +
                 ", message='" + message + '\'' +
                 ", time=" + time +
-                ", author=" + author +
+                ", user=" + user.toString() +
                 '}';
+    }
+
+    @Override
+    public boolean contains(String keyword) {
+        return containsKeyword(getMessage(), keyword);
     }
 
     public String getFormattedTime() {

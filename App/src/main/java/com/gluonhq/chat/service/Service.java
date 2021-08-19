@@ -1,37 +1,41 @@
 package com.gluonhq.chat.service;
 
+import com.gluonhq.chat.model.Channel;
 import com.gluonhq.chat.model.ChatImage;
 import com.gluonhq.chat.model.ChatMessage;
-import javafx.beans.property.ObjectProperty;
+import com.gluonhq.chat.model.User;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import javafx.scene.image.Image;
 
 import java.util.Arrays;
 import java.util.Objects;
-import java.util.function.Consumer;
 import java.util.stream.Collectors;
 
 import static com.gluonhq.chat.service.ImageUtils.IMAGE_PREFIX;
 
 public interface Service {
 
-    ObservableList<ChatMessage> getMessages();
-
-    ObservableList<ChatMessage> getMessages(Consumer<ObservableList<ChatMessage>> consumer);
-
     ObservableList<ChatImage> getImages();
 
-    boolean saveUser(String userName);
+    boolean login(String userName);
 
-    String getName();
+    ObservableList<User> getUsers();
+    
+    ObservableList<Channel> getChannels();
 
-    String getName(Consumer<ObjectProperty<String>> consumer);
+    /**
+     * Returns the currently logged-in user
+     * @return Logged-in user. If no user is logged in, it will return null.
+     */
+    User loggedUser();
+
+    /*String getName(Consumer<ObjectProperty<String>> consumer);*/
 
     default ObservableList<String> getNames(ObservableList<ChatMessage> o) {
         return FXCollections.observableArrayList(
                 o.stream()
-                        .map(ChatMessage::getAuthor)
+                        .map(m -> m.getUser().toString())
                         .filter(Objects::nonNull)
                         .distinct()
                         .collect(Collectors.toList()));
@@ -58,4 +62,6 @@ public interface Service {
             return "";
         }
     }
+
+    ObservableList<ChatMessage> getMessages(Channel channel);
 }
