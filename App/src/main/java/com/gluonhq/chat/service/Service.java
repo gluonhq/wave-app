@@ -21,7 +21,11 @@ public interface Service {
     boolean login(String userName);
 
     ObservableList<User> getUsers();
-    
+
+    /**
+     * Returns a list of channels for the logged user
+     * @return List of Channel
+     */
     ObservableList<Channel> getChannels();
 
     /**
@@ -63,5 +67,10 @@ public interface Service {
         }
     }
 
+    /**
+     * Fetches all messages in a channel
+     * @param channel The channel for which messages are to be fetched
+     * @return List of messages in a channel
+     */
     ObservableList<ChatMessage> getMessages(Channel channel);
 }

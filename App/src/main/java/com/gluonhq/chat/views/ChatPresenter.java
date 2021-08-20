@@ -53,7 +53,7 @@ public class ChatPresenter extends GluonPresenter<GluonChat> {
 
     public void initialize() {
         chatList = new ChatListView<>();
-        chatList.setPlaceholder(new Label(resources.getString("no.messages.yet")));
+        chatList.setPlaceholder(new Label(resources.getString("select.channel")));
         chatList.getStyleClass().add("chat-list");
         chatList.setCellFactory(listView -> new MessageCell());
 
@@ -126,6 +126,7 @@ public class ChatPresenter extends GluonPresenter<GluonChat> {
 
     void updateMessages(Channel channel) {
         createSortList(service.getMessages(channel));
+        bottomPane.setDisable(false);
     }
 
     private void createSortList(ObservableList<ChatMessage> messages) {
