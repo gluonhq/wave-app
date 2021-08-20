@@ -26,7 +26,7 @@ module com.gluonhq.chat {
 //    requires com.gluonhq.emoji.control;
     requires java.sql;
     // TODO: Remove
-    requires org.scenicview.scenicview;
+    // requires org.scenicview.scenicview;
 
     requires com.gluonhq.glisten.afterburner;
     requires java.annotation;

@@ -11,7 +11,6 @@ import com.gluonhq.chat.views.AppViewManager;
 import javafx.scene.Scene;
 import javafx.scene.image.Image;
 import javafx.stage.Stage;
-import org.scenicview.ScenicView;
 
 import java.io.IOException;
 import java.util.logging.Level;
@@ -53,7 +52,7 @@ public class GluonChat extends MobileApplication {
                 LifecycleService.create().ifPresent(LifecycleService::shutdown));
 
         // TODO: Remove
-        ScenicView.show(scene);
+        //ScenicView.show(scene);
     }
 
     public static void main(String[] args) {
