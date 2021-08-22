@@ -67,12 +67,12 @@
                         <list>storage</list>
                     </attachList>
                     <bundlesList>
+                        <list>com.gluonhq.chat.views.channel</list>
                         <list>com.gluonhq.chat.views.chat</list>
                         <list>com.gluonhq.chat.views.login</list>
                         <list>com.gluonhq.chat.views.landscape</list>
                         <list>com.gluonhq.chat.views.maps</list>
                         <list>com.gluonhq.chat.views.portrait</list>
-                        <list>com.gluonhq.chat.views.users</list>
                         <list>org.glassfish.json.messages</list>
                         <!--<list>com.gluonhq.emoji.popup.emoji-popover</list>-->
                         <!--<list>controlsfx</list>-->
@@ -81,16 +81,18 @@
                         <item>logging.properties</item>
                     </resourcesList>
                     <reflectionList>
+                        <list>com.gluonhq.charm.glisten.control.TextField</list>
                         <list>com.gluonhq.chat.service.CloudlinkService</list>
                         <list>com.gluonhq.chat.model.ChatMessage</list>
+                        <list>com.gluonhq.chat.model.ChatMessage</list>
                         <list>com.gluonhq.chat.model.ChatImage</list>
+                        <list>com.gluonhq.chat.views.ChannelPresenter</list>
                         <list>com.gluonhq.chat.views.ChatPresenter</list>
                         <list>com.gluonhq.chat.views.HomePresenter</list>
                         <list>com.gluonhq.chat.views.LandscapePresenter</list>
                         <list>com.gluonhq.chat.views.LoginPresenter</list>
                         <list>com.gluonhq.chat.views.MapsPresenter</list>
                         <list>com.gluonhq.chat.views.PortraitPresenter</list>
-                        <list>com.gluonhq.chat.views.ChannelPresenter</list>
                         <list>org.glassfish.json.JsonProviderImpl</list>
                         <!-- for desktop only -->
 <!--                        <list>com.gluonhq.attach.orientation.impl.DesktopOrientationService</list>-->
