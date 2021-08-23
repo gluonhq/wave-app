@@ -11,6 +11,7 @@ import com.gluonhq.chat.model.Channel;
 import com.gluonhq.chat.model.ChatMessage;
 import com.gluonhq.chat.service.Service;
 import com.gluonhq.chat.views.helper.PlusPopupView;
+import com.gluonhq.emoji.control.EmojiTextArea;
 import javafx.animation.PauseTransition;
 import javafx.beans.InvalidationListener;
 import javafx.beans.Observable;
@@ -19,7 +20,6 @@ import javafx.collections.transformation.SortedList;
 import javafx.fxml.FXML;
 import javafx.scene.control.Button;
 import javafx.scene.control.Label;
-import javafx.scene.control.TextArea;
 import javafx.scene.layout.BorderPane;
 import javafx.scene.layout.HBox;
 import javafx.scene.layout.Priority;
@@ -64,8 +64,7 @@ public class ChatPresenter extends GluonPresenter<GluonChat> {
         unreadBox.visibleProperty().bind(chatList.unreadMessagesProperty().greaterThan(-1));
         unreadBox.setOnMouseClicked(e -> chatList.scrollTo(chatList.getUnreadIndex()));
 
-//        EmojiTextArea messageEditor = new EmojiTextArea();
-        TextArea messageEditor = new TextArea();
+        EmojiTextArea messageEditor = new EmojiTextArea();
         messageEditor.getStyleClass().add("chat-text-editor");
         HBox.setHgrow(messageEditor, Priority.ALWAYS);
         bottomPane.setCenter(messageEditor);
