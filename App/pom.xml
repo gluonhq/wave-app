@@ -84,7 +84,6 @@
                         <list>com.gluonhq.charm.glisten.control.TextField</list>
                         <list>com.gluonhq.chat.service.CloudlinkService</list>
                         <list>com.gluonhq.chat.model.ChatMessage</list>
-                        <list>com.gluonhq.chat.model.ChatMessage</list>
                         <list>com.gluonhq.chat.model.ChatImage</list>
                         <list>com.gluonhq.chat.views.ChannelPresenter</list>
                         <list>com.gluonhq.chat.views.ChatPresenter</list>
