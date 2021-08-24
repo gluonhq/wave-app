@@ -30,7 +30,9 @@ jobs:
           dir: App
 
       - name: Gluon Build
-        run: mvn -Pdesktop gluonfx:build gluonfx:package -f App
+        run: |
+          ls App/src/main/resources
+          mvn install && mvn -Pdesktop gluonfx:build gluonfx:package -f App
 
       - name: Copy native image to staging
         run: cp -r App/target/gluonfx/x86_64-linux/ChatApp* staging

@@ -31,7 +31,7 @@ jobs:
           gluon-license: ${{ secrets.GLUON_LICENSE }}
 
       - name: Gluon Build
-        run: mvn -Pandroid gluonfx:build gluonfx:package -f App
+        run: mvn install && mvn -Pandroid gluonfx:build gluonfx:package -f App
 #        env:
 #          GLUON_ANDROID_KEYSTOREPATH: ${{ steps.android_keystore_file.outputs.filePath }}
 #          GLUON_ANDROID_KEYSTORE_PASSWORD: ${{ secrets.GLUON_ANDROID_KEYSTORE_PASSWORD }}

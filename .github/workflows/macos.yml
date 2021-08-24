@@ -24,7 +24,7 @@ jobs:
           gluon-license: ${{ secrets.GLUON_LICENSE }}
 
       - name: Gluon Build
-        run: mvn -Pdesktop gluonfx:build gluonfx:package -f App
+        run: mvn install && mvn -Pdesktop gluonfx:build gluonfx:package -f App
 
       - name: Copy native image to staging
         run: cp -r App/target/gluonfx/x86_64-darwin/ChatApp* staging

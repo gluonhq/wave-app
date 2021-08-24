@@ -33,7 +33,7 @@ jobs:
           gluon-license: ${{ secrets.GLUON_LICENSE }}
 
       - name: Gluon Build
-        run: mvn -Pios gluonfx:build gluonfx:package -f App
+        run: mvn install && mvn -Pios gluonfx:build gluonfx:package -f App
 
       - name: Copy native image to staging
         run: cp -r App/target/gluonfx/arm64-ios/*.app staging
