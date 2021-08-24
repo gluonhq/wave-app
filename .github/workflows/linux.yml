@@ -24,9 +24,10 @@ jobs:
         run: mkdir staging
 
       - name: Gluon License
-        uses: gluonhq/gluon-build-license@v1
+        uses: abhinayagarwal/gluon-build-license@master
         with:
           gluon-license: ${{ secrets.GLUON_LICENSE }}
+          dir: App
 
       - name: Gluon Build
         run: mvn -Pdesktop gluonfx:build gluonfx:package -f App
