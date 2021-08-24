@@ -15,17 +15,17 @@ jobs:
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
-      - uses: Apple-Actions/import-codesign-certs@v1
-        with:
-          p12-file-base64: ${{ secrets.GLUON_IOS_CERTIFICATES_FILE_BASE64 }}
-          p12-password: ${{ secrets.GLUON_IOS_CERTIFICATES_PASSWORD }}
+#      - uses: Apple-Actions/import-codesign-certs@v1
+#        with:
+#          p12-file-base64: ${{ secrets.GLUON_IOS_CERTIFICATES_FILE_BASE64 }}
+#          p12-password: ${{ secrets.GLUON_IOS_CERTIFICATES_PASSWORD }}
 
-      - uses: Apple-Actions/download-provisioning-profiles@v1
-        with:
-          bundle-id: com.gluonhq.hello.HelloGluonApp
-          issuer-id: ${{ secrets.GLUON_IOS_APPSTORE_ISSUER_ID }}
-          api-key-id: ${{ secrets.GLUON_IOS_APPSTORE_KEY_ID }}
-          api-private-key: ${{ secrets.GLUON_IOS_APPSTORE_PRIVATE_KEY }}
+#      - uses: Apple-Actions/download-provisioning-profiles@v1
+#        with:
+#          bundle-id: com.gluonhq.hello.HelloGluonApp
+#          issuer-id: ${{ secrets.GLUON_IOS_APPSTORE_ISSUER_ID }}
+#          api-key-id: ${{ secrets.GLUON_IOS_APPSTORE_KEY_ID }}
+#          api-private-key: ${{ secrets.GLUON_IOS_APPSTORE_PRIVATE_KEY }}
 
       - name: Gluon License
         uses: gluonhq/gluon-build-license@v1
