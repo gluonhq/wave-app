@@ -73,15 +73,8 @@ public class ChatPresenter extends GluonPresenter<GluonChat> {
         sendButton.prefHeightProperty().bind(addButton.heightProperty());
 
         sendButton.disableProperty().bind(messageEditor.textProperty().isEmpty());
-        sendButton.setOnAction(e -> {
-            String text = messageEditor.getText().trim();
-            if (!text.isEmpty()) {
-                var message = new ChatMessage(text, service.loggedUser());
-                messages.add(message);
-                messageEditor.clear();
-                addButton.requestFocus();
-            }
-        });
+        sendButton.setOnAction(e -> sendMessage(messageEditor));
+        messageEditor.setOnAction(e -> sendMessage(messageEditor));
 
         setupAddButton();
 
@@ -126,6 +119,16 @@ public class ChatPresenter extends GluonPresenter<GluonChat> {
     void updateMessages(Channel channel) {
         createSortList(service.getMessages(channel));
         bottomPane.setDisable(false);
+    }
+
+    private void sendMessage(EmojiTextArea messageEditor) {
+        String text = messageEditor.getText().trim();
+        if (!text.isEmpty()) {
+            var message = new ChatMessage(text, service.loggedUser());
+            messages.add(message);
+            messageEditor.clear();
+            messageEditor.requestFocus();
+        }
     }
 
     private void createSortList(ObservableList<ChatMessage> messages) {
