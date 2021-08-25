@@ -34,13 +34,13 @@ jobs:
           dir: App
 
       - name: Gluon Build
-        run: mvn install && mvn -Pios gluonfx:build gluonfx:package -f App
-
-      - name: Copy native image to staging
-        run: cp -r App/target/gluonfx/arm64-ios/*.app staging
-
-      - name: Upload
-        uses: actions/upload-artifact@v2
-        with:
-          name: Package
-          path: staging
+        run: mvn install && mvn -Pios gluonfx:build -f App
+#
+#      - name: Copy native image to staging
+#        run: cp -r App/target/gluonfx/arm64-ios/*.app staging
+#
+#      - name: Upload
+#        uses: actions/upload-artifact@v2
+#        with:
+#          name: Package
+#          path: staging
