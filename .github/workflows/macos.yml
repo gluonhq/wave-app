@@ -22,6 +22,7 @@ jobs:
         uses: abhinayagarwal/gluon-build-license@master
         with:
           gluon-license: ${{ secrets.GLUON_LICENSE }}
+          dir: App
 
       - name: Gluon Build
         run: mvn install && mvn -Pdesktop gluonfx:build gluonfx:package -f App
