@@ -19,7 +19,7 @@ jobs:
         run: mkdir staging
 
       - name: Gluon License
-        uses: abhinayagarwal/gluon-build-license@master
+        uses: gluonhq/gluon-build-license@master
         with:
           gluon-license: ${{ secrets.GLUON_LICENSE }}
           dir: App
