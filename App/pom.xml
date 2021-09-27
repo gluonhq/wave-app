@@ -18,6 +18,11 @@
 
     <build>
         <plugins>
+        <plugin>
+            <groupId>org.apache.maven.plugins</groupId>
+            <artifactId>maven-compiler-plugin</artifactId>
+            <version>3.8.1</version>
+        </plugin>
             <plugin>
                 <groupId>org.openjfx</groupId>
                 <artifactId>javafx-maven-plugin</artifactId>
@@ -28,13 +33,25 @@
                         <option>--add-opens</option>
                         <option>javafx.graphics/javafx.scene.text=richtextfx</option>
                         <option>--add-opens</option>
+                        <option>javafx.graphics/javafx.scene.text=ALL-UNNAMED</option>
+                        <option>--add-opens</option>
                         <option>javafx.graphics/com.sun.javafx.text=richtextfx</option>
+                        <option>--add-opens</option>
+                        <option>javafx.graphics/com.sun.javafx.text=ALL-UNNAMED</option>
                         <option>--add-opens</option>
                         <option>javafx.graphics/com.sun.javafx.scene.text=richtextfx</option>
                         <option>--add-opens</option>
+                        <option>javafx.graphics/com.sun.javafx.scene.text=ALL-UNNAMED</option>
+                        <option>--add-opens</option>
                         <option>javafx.graphics/com.sun.javafx.geom=richtextfx</option>
                         <option>--add-opens</option>
+                        <option>javafx.graphics/com.sun.javafx.geom=ALL-UNNAMED</option>
+                        <option>--add-opens</option>
                         <option>javafx.graphics/com.sun.javafx.css=org.controlsfx.controls</option>
+                        <option>--add-opens</option>
+                        <option>javafx.graphics/com.sun.javafx.css=ALL-UNNAMED</option>
+                        <option>--add-reads</option>
+                        <option>com.gluonhq.chat=ALL-UNNAMED</option>
                     </options>
                     <mainClass>${mainClassName}</mainClass>
                 </configuration>
@@ -63,6 +80,8 @@
                                 <option>javafx.graphics/com.sun.javafx.geom=richtextfx</option>
                                 <option>--add-opens</option>
                                 <option>javafx.graphics/com.sun.javafx.css=org.controlsfx.controls</option>
+                                <option>--add-reads</option>
+                                <option>com.gluonhq.chat=ALL-UNNAMED</option>
                             </options>
                             <mainClass>${mainClassName}</mainClass>
                         </configuration>
@@ -141,6 +160,16 @@
     </build>
 
     <dependencies>
+        <dependency>
+            <groupId>com.gluonhq</groupId>
+            <artifactId>wave</artifactId>
+            <version>1.0-SNAPSHOT</version>
+        </dependency>
+        <dependency>
+            <groupId>com.google.zxing</groupId>
+            <artifactId>core</artifactId>
+            <version>3.4.1</version>
+        </dependency>
         <dependency>
             <groupId>org.openjfx</groupId>
             <artifactId>javafx-controls</artifactId>
