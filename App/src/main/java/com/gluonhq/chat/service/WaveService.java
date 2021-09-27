@@ -94,19 +94,15 @@ public class WaveService implements Service, MessagingClient {
 //            User user = new User(a.getUuid(), a.getName(), a.getName(), a.getName());
 //        }
 System.err.println("CONTACTS = " + wave.getContacts());   
-if (wave.getContacts() != null) {
-    Contact c0 = wave.getContacts().get(0);
-    System.err.println("C0 = "+c0.getUuid()+" with name =  "+c0.getName()+" and nr = "+c0.getNr());
-}
+
 answer.addAll(wave.getContacts().stream()
                 .map(a -> new User(a.getUuid(), a.getName(), a.getName(), a.getName()))
                 .collect(toList()));
-        System.err.println("user0uuid = "+answer.get(0).getId());
         wave.getContacts().addListener(new ListChangeListener<Contact>() {
             @Override
             public void onChanged(ListChangeListener.Change<? extends Contact> change) {
                 while (change.next()) {
-                    change.getAddedSubList().forEach(c -> answer.add(0, new User("d", "e", "f")));
+                    change.getAddedSubList().forEach(a -> answer.add(0, new User(a.getUuid(), a.getName(), a.getName(), a.getName())));
                 }
             }
         });

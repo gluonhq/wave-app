@@ -14,6 +14,7 @@ import javafx.fxml.FXML;
 
 import javax.inject.Inject;
 import java.util.ResourceBundle;
+import javafx.application.Platform;
 import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
 import org.bouncycastle.jce.provider.BouncyCastleProvider;
@@ -49,6 +50,8 @@ public class LoginPresenter extends GluonPresenter<GluonChat> implements Provisi
         try {
             wave.createAccount(number, "gluon-"+rnd);
             wave.syncContacts();
+            Platform.runLater(() -> AppViewManager.FIRST_VIEW.switchView(ViewStackPolicy.SKIP));
+
         } catch (Exception ex) {
             ex.printStackTrace();
         }
