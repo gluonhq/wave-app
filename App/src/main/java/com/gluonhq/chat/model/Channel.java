@@ -11,7 +11,7 @@ public class Channel extends Searchable {
     private String name;
     private boolean isDirect;
     private final ObservableList<User> members;
-    private ObservableList<ChatMessage> messages;
+    private ObservableList<ChatMessage> messages = FXCollections.observableArrayList();
 
     public Channel(String name, ObservableList<User> members) {
         this.id = UUID.randomUUID().toString();

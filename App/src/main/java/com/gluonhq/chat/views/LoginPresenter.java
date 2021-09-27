@@ -8,34 +8,25 @@ import com.gluonhq.chat.service.Service;
 import com.gluonhq.elita.QRGenerator;
 import com.gluonhq.wave.WaveManager;
 import com.gluonhq.wave.provisioning.ProvisioningClient;
-import java.io.IOException;
-import java.security.NoSuchAlgorithmException;
 import java.security.Security;
 import java.util.Random;
-import javafx.beans.binding.Bindings;
 import javafx.fxml.FXML;
 
 import javax.inject.Inject;
 import java.util.ResourceBundle;
-import java.util.logging.Level;
-import java.util.logging.Logger;
-import javafx.beans.InvalidationListener;
-import javafx.beans.Observable;
 import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
 import org.bouncycastle.jce.provider.BouncyCastleProvider;
-import org.whispersystems.libsignal.InvalidKeyException;
-import org.whispersystems.signalservice.api.crypto.UntrustedIdentityException;
 
 public class LoginPresenter extends GluonPresenter<GluonChat> implements ProvisioningClient {
 
     @FXML
     private View loginView;
 
-    @Inject private Service service;
-
     @FXML
-    private ResourceBundle resources;
+    private ImageView qrImageView;
+            
+    @Inject private Service service;
     
     private WaveManager wave = new WaveManager();
 
@@ -48,8 +39,7 @@ public class LoginPresenter extends GluonPresenter<GluonChat> implements Provisi
     public void gotProvisioningUrl(String url) {
         System.err.println("[LoginPresenter] setProvisioningURL to " + url);
         Image image = QRGenerator.getImage(url);
-        javafx.application.Platform.runLater(()
-                -> loginView.getChildren().add(new ImageView(image)));
+        javafx.application.Platform.runLater(() -> qrImageView.setImage(image));
     }
 
     @Override

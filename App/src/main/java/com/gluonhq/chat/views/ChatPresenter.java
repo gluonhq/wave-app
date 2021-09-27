@@ -50,6 +50,7 @@ public class ChatPresenter extends GluonPresenter<GluonChat> {
     private ChatListView<ChatMessage> chatList;
     private ObservableList<ChatMessage> messages;
     private PauseTransition pause;
+    private Channel currentChannel;
 
     public void initialize() {
         chatList = new ChatListView<>();
@@ -120,6 +121,7 @@ public class ChatPresenter extends GluonPresenter<GluonChat> {
     }
 
     void updateMessages(Channel channel) {
+        this.currentChannel = channel;
         createSortList(service.getMessages(channel));
         bottomPane.setDisable(false);
     }
@@ -127,7 +129,7 @@ public class ChatPresenter extends GluonPresenter<GluonChat> {
     private void sendMessage(EmojiTextArea messageEditor) {
         String text = messageEditor.getText().trim();
         if (!text.isEmpty()) {
-            var message = new ChatMessage(text, service.loggedUser());
+            var message = new ChatMessage(text, service.loggedUser(), true);
             messages.add(message);
             messageEditor.clear();
             messageEditor.requestFocus();

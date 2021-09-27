@@ -6,6 +6,7 @@ import java.util.UUID;
 
 public class ChatMessage extends Searchable {
 
+    boolean localOriginated = false;
     String id;
     String message;
     LocalDateTime time;
@@ -15,10 +16,15 @@ public class ChatMessage extends Searchable {
     }
 
     public ChatMessage(String message, User user) {
+        this (message, user, false);
+    }
+    
+    public ChatMessage(String message, User user, boolean local) {
         this.id = UUID.randomUUID().toString();
         this.message = message;
         this.time = LocalDateTime.now();
         this.user = user;
+        this.localOriginated = true;
     }
 
     public String getMessage() {
@@ -68,5 +74,9 @@ public class ChatMessage extends Searchable {
     public String getFormattedTime() {
         return getTime().toLocalDate().toString() + " " +
                 String.format("%02d:%02d", getTime().getHour(),getTime().getMinute());
+    }
+    
+    public boolean isLocalOriginated() {
+        return localOriginated;
     }
 }
