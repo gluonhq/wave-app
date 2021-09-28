@@ -15,6 +15,8 @@ import javafx.scene.image.Image;
 
 import java.util.stream.Collectors;
 import static java.util.stream.Collectors.toList;
+import javafx.beans.InvalidationListener;
+import javafx.beans.Observable;
 import javafx.collections.ListChangeListener;
 
 public class WaveService implements Service, MessagingClient {
@@ -25,7 +27,8 @@ public class WaveService implements Service, MessagingClient {
     boolean channelsClean = false;
 
     public WaveService () {
-        wave = new WaveManager();
+        wave = WaveManager.getInstance();
+        System.err.println("Creating waveService: "+ System.identityHashCode(wave));
         if (wave.isInitialized()) {
             login("You");
             registerListeners();
@@ -86,24 +89,38 @@ public class WaveService implements Service, MessagingClient {
         return true;
     }
 
+    ObservableList<Contact> contacts;
     @Override
     public ObservableList<User> getUsers() {
         System.err.println("GET USERS!");
         ObservableList<User> answer = FXCollections.observableArrayList();
-//        for (Contact a: wave.getContacts()){
-//            User user = new User(a.getUuid(), a.getName(), a.getName(), a.getName());
-//        }
-System.err.println("CONTACTS = " + wave.getContacts());   
+//      ObservableList<Contact> contacts = wave.getContacts();
+        contacts = wave.getContacts();
 
-answer.addAll(wave.getContacts().stream()
+        System.err.println("CONTACTS = " + contacts+ " with orig hash = "
+                +System.identityHashCode(contacts) + " and wave = "+System.identityHashCode(wave));   
+
+        answer.addAll(contacts.stream()
                 .map(a -> new User(a.getUuid(), a.getName(), a.getName(), a.getName()))
                 .collect(toList()));
-        wave.getContacts().addListener(new ListChangeListener<Contact>() {
+        System.err.println("Add invalidation listener");
+        contacts.addListener(new InvalidationListener() {
+            @Override
+            public void invalidated(Observable o) {
+                System.err.println("CONTACTS INVALIDATED, is now "+contacts.size());
+                System.err.println("contacts = "+ contacts);
+            }
+        });
+        System.err.println("add lcl");
+        contacts.addListener(new ListChangeListener<Contact>() {
             @Override
             public void onChanged(ListChangeListener.Change<? extends Contact> change) {
+                System.err.println("Contacts changed! ");
                 while (change.next()) {
+                    System.err.println("WAVESERVICE got new Contacts");
                     change.getAddedSubList().forEach(a -> answer.add(0, new User(a.getUuid(), a.getName(), a.getName(), a.getName())));
                 }
+                System.err.println("size of contacts = "+answer.size());
             }
         });
         
@@ -115,12 +132,23 @@ answer.addAll(wave.getContacts().stream()
     public ObservableList<Channel> getChannels() {
         if (!channelsClean) {
             channels =  FXCollections.observableArrayList();
-        channels.addAll(
-                new Channel("general", getUsers()),
-                new Channel("notification", getUsers().filtered(u -> u.getUsername().startsWith("j"))),
-                new Channel("track", getUsers().filtered(u -> !u.getUsername().startsWith("j"))));
+            ObservableList<User> users = getUsers();
+//        channels.addAll(
+//                new Channel("general", getUsers()),
+//                new Channel("notification", getUsers().filtered(u -> u.getUsername().startsWith("j"))),
+//                new Channel("track", getUsers().filtered(u -> !u.getUsername().startsWith("j"))));
         
-        channels.addAll(getUsers().stream().map(user -> new Channel(user) ).collect(toList()));
+        channels.addAll(users.stream().map(user -> new Channel(user) ).collect(toList()));
+        users.addListener(new ListChangeListener<User>() {
+                @Override
+                public void onChanged(ListChangeListener.Change<? extends User> change) {
+                      System.err.println("Users changed! ");
+                while (change.next()) {
+                    change.getAddedSubList().forEach(a -> channels.add(0, new Channel(a)));
+                }
+                System.err.println("size of users = "+channels.size());
+                }
+            });
         channelsClean = true;
         }
         return channels;

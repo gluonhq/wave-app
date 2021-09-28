@@ -29,7 +29,7 @@ public class LoginPresenter extends GluonPresenter<GluonChat> implements Provisi
             
     @Inject private Service service;
     
-    private WaveManager wave = new WaveManager();
+    private WaveManager wave = WaveManager.getInstance();
 
     static {
         Security.addProvider(new BouncyCastleProvider());
