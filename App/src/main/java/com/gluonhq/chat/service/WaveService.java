@@ -15,20 +15,21 @@ import javafx.scene.image.Image;
 
 import java.util.stream.Collectors;
 import static java.util.stream.Collectors.toList;
+import javafx.application.Platform;
 import javafx.beans.InvalidationListener;
 import javafx.beans.Observable;
 import javafx.collections.ListChangeListener;
 
 public class WaveService implements Service, MessagingClient {
-
+    
     private User loggedUser;
     private final WaveManager wave;
-    ObservableList<Channel> channels =  FXCollections.observableArrayList();
+    ObservableList<Channel> channels = FXCollections.observableArrayList();
     boolean channelsClean = false;
-
-    public WaveService () {
+    
+    public WaveService() {
         wave = WaveManager.getInstance();
-        System.err.println("Creating waveService: "+ System.identityHashCode(wave));
+        System.err.println("Creating waveService: " + System.identityHashCode(wave));
         if (wave.isInitialized()) {
             login("You");
             registerListeners();
@@ -43,13 +44,13 @@ public class WaveService implements Service, MessagingClient {
                 ImageUtils.encodeImage("3", new Image("/icon.png"))
         );
     }
-
+    
     @Override
     public String addImage(String id, Image image) {
         // no-op
         return id;
     }
-
+    
     @Override
     public ObservableList<ChatMessage> getMessages(Channel channel) {
         ObservableList<ChatMessage> answer = channel.getMessages();
@@ -67,13 +68,12 @@ public class WaveService implements Service, MessagingClient {
             public void onChanged(ListChangeListener.Change<? extends ChatMessage> change) {
                 while (change.next()) {
                     List<? extends ChatMessage> subList = change.getAddedSubList();
-                    System.err.println("ADDED message for channel "+ channel+": "+change.getAddedSubList());
+                    System.err.println("ADDED message for channel " + channel + ": " + change.getAddedSubList());
                     System.err.println("Members in this channel: " + channel.getMembers());
                     for (ChatMessage message : subList) {
                         if (message.isLocalOriginated()) {
-                            
                             String uuid = channel.getMembers().get(0).getId();
-                            System.err.println("UUID = "+uuid);
+                            System.err.println("UUID = " + uuid);
                             wave.sendMessage(uuid, message.getMessage());
                         }
                     }
@@ -82,102 +82,96 @@ public class WaveService implements Service, MessagingClient {
         });
         return answer;
     }
-
+    
     @Override
     public boolean login(String username) {
         this.loggedUser = new User(username, "First Name", "Last Name");
         return true;
     }
-
+    
     ObservableList<Contact> contacts;
+
     @Override
     public ObservableList<User> getUsers() {
-        System.err.println("GET USERS!");
         ObservableList<User> answer = FXCollections.observableArrayList();
-//      ObservableList<Contact> contacts = wave.getContacts();
-        contacts = wave.getContacts();
-
-        System.err.println("CONTACTS = " + contacts+ " with orig hash = "
-                +System.identityHashCode(contacts) + " and wave = "+System.identityHashCode(wave));   
-
+        contacts = wave.getContacts();        
+        
         answer.addAll(contacts.stream()
-                .map(a -> new User(a.getUuid(), a.getName(), a.getName(), a.getName()))
+                .map(a -> createUserFromContact(a))
                 .collect(toList()));
-        System.err.println("Add invalidation listener");
+        
         contacts.addListener(new InvalidationListener() {
             @Override
             public void invalidated(Observable o) {
-                System.err.println("CONTACTS INVALIDATED, is now "+contacts.size());
-                System.err.println("contacts = "+ contacts);
+                answer.clear();
+                answer.addAll(contacts.stream()
+                        .map(a -> createUserFromContact(a))
+                        .collect(toList()));
             }
         });
-        System.err.println("add lcl");
-        contacts.addListener(new ListChangeListener<Contact>() {
-            @Override
-            public void onChanged(ListChangeListener.Change<? extends Contact> change) {
-                System.err.println("Contacts changed! ");
-                while (change.next()) {
-                    System.err.println("WAVESERVICE got new Contacts");
-                    change.getAddedSubList().forEach(a -> answer.add(0, new User(a.getUuid(), a.getName(), a.getName(), a.getName())));
-                }
-                System.err.println("size of contacts = "+answer.size());
-            }
-        });
-        
-        return answer;
-        
-    }
 
+        return answer;
+    }
+    
     @Override
     public ObservableList<Channel> getChannels() {
         if (!channelsClean) {
-            channels =  FXCollections.observableArrayList();
+            channels = FXCollections.observableArrayList();
             ObservableList<User> users = getUsers();
-//        channels.addAll(
-//                new Channel("general", getUsers()),
-//                new Channel("notification", getUsers().filtered(u -> u.getUsername().startsWith("j"))),
-//                new Channel("track", getUsers().filtered(u -> !u.getUsername().startsWith("j"))));
-        
-        channels.addAll(users.stream().map(user -> new Channel(user) ).collect(toList()));
-        users.addListener(new ListChangeListener<User>() {
+            channels.addAll(users.stream().map(user -> new Channel(user)).collect(toList()));
+            
+            users.addListener(new InvalidationListener() {
                 @Override
-                public void onChanged(ListChangeListener.Change<? extends User> change) {
-                      System.err.println("Users changed! ");
-                while (change.next()) {
-                    change.getAddedSubList().forEach(a -> channels.add(0, new Channel(a)));
-                }
-                System.err.println("size of users = "+channels.size());
+                public void invalidated(Observable o) {
+                    Platform.runLater(() -> {
+                        channels.clear();
+                        channels.addAll(users.stream().map(u -> new Channel(u)).collect(toList()));
+                    });
                 }
             });
-        channelsClean = true;
+
+            channelsClean = true;
         }
         return channels;
     }
-
+    
     @Override
     public User loggedUser() {
         return loggedUser;
     }
-
+    
     void registerListeners() {
         this.wave.setMessageListener(this);
     }
+
     /*@Override
     public String getName(Consumer<ObjectProperty<String>> consumer) {
         consumer.accept(new SimpleObjectProperty<>("name"));
         return getName();
     }*/
-
+    
     @Override
     public void gotMessage(String senderUuid, String content) {
-        System.err.println("GOT MESSAGE from "+senderUuid+" with content "+content);
-        System.err.println("Channels = "+this.channels);
+        System.err.println("GOT MESSAGE from " + senderUuid + " with content " + content);
+        System.err.println("Channels = " + this.channels);
         Channel dest = this.channels.stream()
                 .filter(c -> c.getMembers().size() > 0)
                 .filter(c -> c.getMembers().get(0).getId().equals(senderUuid))
                 .findFirst().get();
         ChatMessage chatMessage = new ChatMessage(content, dest.getMembers().get(0));
-        dest.getMessages().add(chatMessage);
-        System.err.println("Message is for "+dest+" and its messages are now "+dest.getMessages());
+        Platform.runLater(() -> dest.getMessages().add(chatMessage));
+        System.err.println("Message is for " + dest + " and its messages are now " + dest.getMessages());
+    }
+    
+    private static User createUserFromContact(Contact c) {
+        String firstName = c.getName();
+        if ((c.getName() == null) || (c.getName().isEmpty())) {
+            firstName = c.getNr();
+            if ((firstName == null) || (firstName.isEmpty())) {
+                firstName = c.getUuid();
+            }
+        }
+        User answer = new User(c.getUuid(), firstName, firstName, "");
+        return answer;
     }
 }

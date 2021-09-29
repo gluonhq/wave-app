@@ -49,6 +49,7 @@ public class LoginPresenter extends GluonPresenter<GluonChat> implements Provisi
         int rnd = new Random().nextInt(1000);
         try {
             wave.createAccount(number, "gluon-"+rnd);
+            service.login("YOU");
             wave.syncContacts();
             Platform.runLater(() -> AppViewManager.FIRST_VIEW.switchView(ViewStackPolicy.SKIP));
 

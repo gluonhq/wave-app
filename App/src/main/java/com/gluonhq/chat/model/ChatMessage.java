@@ -24,7 +24,7 @@ public class ChatMessage extends Searchable {
         this.message = message;
         this.time = LocalDateTime.now();
         this.user = user;
-        this.localOriginated = true;
+        this.localOriginated = local;
     }
 
     public String getMessage() {
