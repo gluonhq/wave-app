@@ -54,15 +54,15 @@ public class WaveService implements Service, MessagingClient {
     @Override
     public ObservableList<ChatMessage> getMessages(Channel channel) {
         ObservableList<ChatMessage> answer = channel.getMessages();
+        // if this is a completely empty channel, we start with a dummy message
+        // so that the user knows what this channel is about
         if (answer.size() == 0) {
             List<ChatMessage> intro = channel.getMembers().stream()
                     .map(user -> new ChatMessage("Message from " + user.displayName(), user))
                     .collect(Collectors.toList());
             answer.addAll(intro);
         }
-//        ObservableList<ChatMessage>  answer = channel.getMembers().stream()
-//                .map(user -> new ChatMessage("Message from " + user.displayName(), user))
-//                .collect(Collectors.toCollection(FXCollections::observableArrayList));
+
         answer.addListener(new ListChangeListener<ChatMessage>() {
             @Override
             public void onChanged(ListChangeListener.Change<? extends ChatMessage> change) {
@@ -143,17 +143,10 @@ public class WaveService implements Service, MessagingClient {
     void registerListeners() {
         this.wave.setMessageListener(this);
     }
-
-    /*@Override
-    public String getName(Consumer<ObjectProperty<String>> consumer) {
-        consumer.accept(new SimpleObjectProperty<>("name"));
-        return getName();
-    }*/
     
     @Override
     public void gotMessage(String senderUuid, String content) {
         System.err.println("GOT MESSAGE from " + senderUuid + " with content " + content);
-        System.err.println("Channels = " + this.channels);
         Channel dest = this.channels.stream()
                 .filter(c -> c.getMembers().size() > 0)
                 .filter(c -> c.getMembers().get(0).getId().equals(senderUuid))

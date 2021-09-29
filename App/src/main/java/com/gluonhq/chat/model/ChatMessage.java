@@ -6,7 +6,7 @@ import java.util.UUID;
 
 public class ChatMessage extends Searchable {
 
-    boolean localOriginated = false;
+    boolean localOriginated = false; // true when this message originates from this client
     String id;
     String message;
     LocalDateTime time;

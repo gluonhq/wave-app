@@ -10,10 +10,23 @@ public class User extends Searchable {
     private String firstname;
     private String lastname;
 
+    /**
+     * Create a new user, and assign a random id based on a random UUID
+     * @param username
+     * @param firstname
+     * @param lastname 
+     */
     public User(String username, String firstname, String lastname) {
         this(UUID.randomUUID().toString(), username, firstname, lastname);
     }
 
+    /**
+     * Create a new user
+     * @param uuid an implementation-specific provided unique identifier
+     * @param username
+     * @param firstname
+     * @param lastname 
+     */
     public User(String uuid, String username, String firstname, String lastname) {
         this.id = uuid;
         this.username = username;
