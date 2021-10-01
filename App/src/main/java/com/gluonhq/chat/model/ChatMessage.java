@@ -1,10 +1,8 @@
 package com.gluonhq.chat.model;
 
 import java.time.LocalDateTime;
-import java.time.ZoneOffset;
 import java.util.Objects;
 import java.util.UUID;
-import java.util.concurrent.ThreadLocalRandom;
 
 public class ChatMessage extends Searchable {
 
@@ -13,11 +11,11 @@ public class ChatMessage extends Searchable {
     LocalDateTime time;
     User user;
 
-    public ChatMessage(String message, User user) {
+    public ChatMessage(String message, User user, LocalDateTime time) {
         this.id = UUID.randomUUID().toString();
         this.message = message;
-        this.time = randomDateTime();
         this.user = user;
+        this.time = time;
     }
 
     public String getMessage() {
@@ -67,13 +65,5 @@ public class ChatMessage extends Searchable {
     public String getFormattedTime() {
         return getTime().toLocalDate().toString() + " " +
                 String.format("%02d:%02d", getTime().getHour(),getTime().getMinute());
-    }
-    
-    // TODO: Remove
-    LocalDateTime randomDateTime() {
-        long minDay = LocalDateTime.of(1970, 1, 1, 0, 0).toEpochSecond(ZoneOffset.UTC);
-        long maxDay = LocalDateTime.of(2021, 1, 1, 0, 0).toEpochSecond(ZoneOffset.UTC);
-        long randomTime = ThreadLocalRandom.current().nextLong(minDay, maxDay);
-        return LocalDateTime.ofEpochSecond(randomTime, 0, ZoneOffset.UTC);
     }
 }

@@ -7,6 +7,7 @@ import com.gluonhq.chat.GluonChat;
 import com.gluonhq.chat.model.Channel;
 import com.gluonhq.chat.model.ChatMessage;
 import com.gluonhq.chat.service.Service;
+import javafx.beans.InvalidationListener;
 import javafx.collections.transformation.FilteredList;
 import javafx.collections.transformation.SortedList;
 import javafx.fxml.FXML;
@@ -42,6 +43,11 @@ public class ChannelPresenter extends GluonPresenter<GluonChat> {
     private FilteredList<Channel> createChannelList() {
         SortedList<Channel> sortedList = new SortedList<>(service.getChannels());
         sortedList.setComparator(Comparator.comparing(this::latestMessageTime).reversed());
+        for (Channel channel : sortedList) {
+            channel.getMessages().addListener((InvalidationListener) o -> {
+                sortedList.setComparator(Comparator.comparing(ChannelPresenter.this::latestMessageTime).reversed());
+            });
+        }
         return new FilteredList<>(sortedList);
     }
 
