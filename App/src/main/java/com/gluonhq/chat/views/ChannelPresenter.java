@@ -41,15 +41,14 @@ public class ChannelPresenter extends GluonPresenter<GluonChat> {
 
     private FilteredList<Channel> createChannelList() {
         SortedList<Channel> sortedList = new SortedList<>(service.getChannels());
-        // Need to find this in an observable way
-        sortedList.setComparator(Comparator.comparing(this::latestMessageTime));
+        sortedList.setComparator(Comparator.comparing(this::latestMessageTime).reversed());
         return new FilteredList<>(sortedList);
     }
 
     private LocalDateTime latestMessageTime(Channel channel) {
         return channel.getMessages().stream()
                 .map(ChatMessage::getTime)
-                .min(LocalDateTime::compareTo)
-                .orElseGet(LocalDateTime::now);
+                .max(LocalDateTime::compareTo)
+                .orElseGet(() -> LocalDateTime.of(1970, 1, 1, 0, 0));
     }
 }
