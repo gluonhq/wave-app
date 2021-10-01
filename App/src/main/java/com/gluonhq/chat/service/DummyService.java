@@ -2,13 +2,10 @@ package com.gluonhq.chat.service;
 
 import com.gluonhq.chat.model.Channel;
 import com.gluonhq.chat.model.ChatImage;
-import com.gluonhq.chat.model.ChatMessage;
 import com.gluonhq.chat.model.User;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import javafx.scene.image.Image;
-
-import java.util.stream.Collectors;
 
 public class DummyService implements Service {
 
@@ -27,13 +24,6 @@ public class DummyService implements Service {
     public String addImage(String id, Image image) {
         // no-op
         return id;
-    }
-
-    @Override
-    public ObservableList<ChatMessage> getMessages(Channel channel) {
-        return channel.getMembers().stream()
-                .map(user -> new ChatMessage("Message from " + user.displayName(), user))
-                .collect(Collectors.toCollection(FXCollections::observableArrayList));
     }
 
     @Override

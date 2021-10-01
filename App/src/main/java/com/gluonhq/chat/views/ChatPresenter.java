@@ -120,7 +120,7 @@ public class ChatPresenter extends GluonPresenter<GluonChat> {
     }
 
     void updateMessages(Channel channel) {
-        createSortList(service.getMessages(channel));
+        createSortList(channel.getMessages());
         bottomPane.setDisable(false);
     }
 

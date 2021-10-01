@@ -4,6 +4,7 @@ import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 
 import java.util.UUID;
+import java.util.stream.Collectors;
 
 public class Channel extends Searchable {
 
@@ -11,12 +12,17 @@ public class Channel extends Searchable {
     private String name;
     private boolean isDirect;
     private final ObservableList<User> members;
-    private ObservableList<ChatMessage> messages;
+    private final ObservableList<ChatMessage> messages;
 
     public Channel(String name, ObservableList<User> members) {
         this.id = UUID.randomUUID().toString();
         this.name = name;
         this.members = members;
+
+        // TODO: Find a way to move this out
+        messages = members.stream()
+                .map(user -> new ChatMessage("Message from " + user.displayName(), user))
+                .collect(Collectors.toCollection(FXCollections::observableArrayList));
     }
 
     /**

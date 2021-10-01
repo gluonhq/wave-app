@@ -5,11 +5,15 @@ import com.gluonhq.charm.glisten.control.CharmListView;
 import com.gluonhq.charm.glisten.control.TextField;
 import com.gluonhq.chat.GluonChat;
 import com.gluonhq.chat.model.Channel;
+import com.gluonhq.chat.model.ChatMessage;
 import com.gluonhq.chat.service.Service;
 import javafx.collections.transformation.FilteredList;
+import javafx.collections.transformation.SortedList;
 import javafx.fxml.FXML;
 
 import javax.inject.Inject;
+import java.time.LocalDateTime;
+import java.util.Comparator;
 import java.util.ResourceBundle;
 
 public class ChannelPresenter extends GluonPresenter<GluonChat> {
@@ -23,15 +27,29 @@ public class ChannelPresenter extends GluonPresenter<GluonChat> {
     private FilteredList<Channel> channelFilteredList;
 
     public void initialize() {
+        channelFilteredList = createChannelList();
         search.textProperty().addListener((o, ov, nv) -> channelFilteredList.setPredicate(channel -> {
             if (nv == null || nv.isEmpty()) {
                 return true;
             }
             return channel.contains(nv);
         }));
-        channelFilteredList = new FilteredList<>(service.getChannels());
         channelList.setItems(channelFilteredList);
         channelList.setCellFactory(param -> new ChannelCell());
         channelList.setHeadersFunction(param -> param.isDirect() ? "DIRECT" : "CHANNELS");
     }
- }
+
+    private FilteredList<Channel> createChannelList() {
+        SortedList<Channel> sortedList = new SortedList<>(service.getChannels());
+        // Need to find this in an observable way
+        sortedList.setComparator(Comparator.comparing(this::latestMessageTime));
+        return new FilteredList<>(sortedList);
+    }
+
+    private LocalDateTime latestMessageTime(Channel channel) {
+        return channel.getMessages().stream()
+                .map(ChatMessage::getTime)
+                .min(LocalDateTime::compareTo)
+                .orElseGet(LocalDateTime::now);
+    }
+}
