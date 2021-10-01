@@ -165,6 +165,7 @@ public class WaveService implements Service, MessagingClient {
             }
         }
         User answer = new User(c.getUuid(), firstName, firstName, "");
+        answer.setAvatarPath(c.getAvatarPath());
         return answer;
     }
 }
