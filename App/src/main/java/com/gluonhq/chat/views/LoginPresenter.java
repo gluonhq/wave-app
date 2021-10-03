@@ -6,6 +6,8 @@ import com.gluonhq.charm.glisten.mvc.View;
 import com.gluonhq.chat.GluonChat;
 import com.gluonhq.chat.service.Service;
 import javafx.fxml.FXML;
+import javafx.scene.image.ImageView;
+
 
 import javax.inject.Inject;
 import java.util.ResourceBundle;
@@ -13,6 +15,7 @@ import java.util.ResourceBundle;
 public class LoginPresenter extends GluonPresenter<GluonChat> {
 
     @FXML private View loginView;
+    @FXML private ImageView qrImageView;
 
     @Inject private Service service;
 
@@ -24,7 +27,17 @@ public class LoginPresenter extends GluonPresenter<GluonChat> {
             getApp().getAppBar().setManaged(false);
         });
         if (service.loggedUser() != null) {
-            AppViewManager.FIRST_VIEW.switchView(ViewStackPolicy.SKIP);
+            nextStep();
+        } else {
+            service.bootstrap(this);
         }
+    }
+
+    public ImageView getQrImageView() {
+        return qrImageView;
+    }
+
+    public void nextStep() {
+        AppViewManager.FIRST_VIEW.switchView(ViewStackPolicy.SKIP);
     }
 }

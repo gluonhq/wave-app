@@ -11,7 +11,11 @@ public class User extends Searchable {
     private String lastname;
 
     public User(String username, String firstname, String lastname) {
-        this.id = UUID.randomUUID().toString();
+        this(username, firstname, lastname, UUID.randomUUID().toString());
+    }
+
+    public User(String username, String firstname, String lastname, String uuid) {
+        this.id = uuid;
         this.username = username;
         this.firstname = firstname;
         this.lastname = lastname;
@@ -44,7 +48,7 @@ public class User extends Searchable {
     public void setLastname(String lastname) {
         this.lastname = lastname;
     }
-    
+
     public String displayName() {
         return firstname + " " + lastname;
     }
