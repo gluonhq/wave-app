@@ -11,13 +11,18 @@ import com.gluonhq.wave.QRGenerator;
 import com.gluonhq.wave.WaveManager;
 import com.gluonhq.wave.message.MessagingClient;
 import com.gluonhq.wave.provisioning.ProvisioningClient;
+import java.io.File;
+import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.StandardOpenOption;
 import java.time.LocalDateTime;
 import java.security.Security;
 
-import java.util.Collections;
 import java.util.HashMap;
-import java.util.Map;
+import java.util.LinkedList;
 import java.util.List;
+import java.util.Map;
 import java.util.Random;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
@@ -118,7 +123,7 @@ public class WaveService implements Service, ProvisioningClient, MessagingClient
     }
 
     @Override
-    public void gotMessage(String senderUuid, String content) {
+    public void gotMessage(String senderUuid, String content, long timestamp) {
                 System.err.println("GOT MESSAGE from " + senderUuid + " with content " + content);
         Channel dest = this.channels.stream()
                 .filter(c -> c.getMembers().size() > 0)
@@ -126,7 +131,23 @@ public class WaveService implements Service, ProvisioningClient, MessagingClient
                 .findFirst().get();
         ChatMessage chatMessage = new ChatMessage(content, dest.getMembers().get(0), LocalDateTime.now());
         Platform.runLater(() -> dest.getMessages().add(chatMessage));
+        storeMessage(senderUuid, content, timestamp);
         System.err.println("Message is for " + dest + " and its messages are now " + dest.getMessages());
+    }
+    
+    private void storeMessage(String senderUuid, String content, long timestamp) {
+        try {
+            File contactsDir = wave.SIGNAL_FX_CONTACTS_DIR;
+            Path contactPath = contactsDir.toPath().resolve(senderUuid);
+            Path messagelog = contactPath.resolve("chatlog");
+            Files.createDirectories(contactPath);
+            List<String> ct = new LinkedList();
+            ct.add(content);
+            ct.add(Long.toString(timestamp));
+            Files.write(messagelog, ct, StandardOpenOption.CREATE, StandardOpenOption.APPEND);
+        } catch (IOException ex) {
+            ex.printStackTrace();
+        }
     }
 
     @Override
