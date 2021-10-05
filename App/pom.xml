@@ -154,7 +154,7 @@
         <dependency>
             <groupId>com.gluonhq</groupId>
             <artifactId>wave</artifactId>
-            <version>0.1.4-SNAPSHOT</version>
+            <version>0.1.5</version>
         </dependency>
         <dependency>
             <groupId>com.google.zxing</groupId>
