@@ -18,12 +18,16 @@ import java.nio.file.Path;
 import java.nio.file.StandardOpenOption;
 import java.time.LocalDateTime;
 import java.security.Security;
+import java.time.Instant;
+import java.time.ZoneId;
 
 import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.Random;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import javafx.scene.image.Image;
@@ -55,7 +59,7 @@ public class WaveService implements Service, ProvisioningClient, MessagingClient
         wave = WaveManager.getInstance();
         System.err.println("Creating waveService: " + System.identityHashCode(wave));
         if (wave.isInitialized()) {
-            login("You");
+            login(wave.getMyUuid());
             this.wave.setMessageListener(this);
         }
     }
@@ -66,8 +70,8 @@ public class WaveService implements Service, ProvisioningClient, MessagingClient
     }
 
     @Override
-    public boolean login(String userName) {
-        this.loggedUser = new User(userName, "First Name", "Last Name");
+    public boolean login(String uuid) {
+        this.loggedUser = new User("you", "First Name", "Last Name", uuid);
         return true;
     }
    
@@ -99,7 +103,7 @@ public class WaveService implements Service, ProvisioningClient, MessagingClient
             ObservableList<User> users = getUsers();
             channels.addAll(users.stream().map(user -> createChannelFromUser(user))
                     .collect(Collectors.toList()));
-
+            channels.forEach(c -> readMessageForChannel(c));
             users.addListener(new InvalidationListener() {
                 @Override
                 public void invalidated(Observable o) {
@@ -116,6 +120,37 @@ public class WaveService implements Service, ProvisioningClient, MessagingClient
         }
         return channels;
     }
+    
+    private void readMessageForChannel(Channel c) {
+        try {
+            User user = c.getMembers().get(0);
+            String id = user.getId();
+            File contactsDir = wave.SIGNAL_FX_CONTACTS_DIR;
+            Path contactPath = contactsDir.toPath().resolve(id);
+            Path messagelog = contactPath.resolve("chatlog");
+            if (!Files.exists(messagelog)) {
+                System.err.println("no chatlog for "+id);
+                return;
+            }
+            System.err.println("WE GOT A CAT!");
+            List<String> lines = Files.readAllLines(messagelog);
+            int cnt = lines.size();
+            for (int i = 0; i < cnt; i = i +3) {
+                String senderuuid = lines.get(i);
+                System.err.println("senderuuid = "+senderuuid+" and me = "+this.loggedUser.getId());
+                String content = lines.get(i+1);
+                long timestamp = Long.parseLong(lines.get(i+2));
+                Instant instant = Instant.ofEpochMilli(timestamp);
+                LocalDateTime ldt = LocalDateTime.ofInstant(instant, ZoneId.systemDefault());
+                User author = this.loggedUser.getId().equals(senderuuid) ? this.loggedUser : user; 
+                ChatMessage cm = new ChatMessage(content, author, ldt);
+                c.getMessages().add(cm);
+                System.err.println("added "+cm+" for "+user);
+            }
+        } catch (IOException ex) {
+            ex.printStackTrace();
+        }
+    }
 
     @Override
     public User loggedUser() {
@@ -131,17 +166,18 @@ public class WaveService implements Service, ProvisioningClient, MessagingClient
                 .findFirst().get();
         ChatMessage chatMessage = new ChatMessage(content, dest.getMembers().get(0), LocalDateTime.now());
         Platform.runLater(() -> dest.getMessages().add(chatMessage));
-        storeMessage(senderUuid, content, timestamp);
+        storeMessage(senderUuid, senderUuid, content, timestamp);
         System.err.println("Message is for " + dest + " and its messages are now " + dest.getMessages());
     }
     
-    private void storeMessage(String senderUuid, String content, long timestamp) {
+    private void storeMessage(String userUuid, String senderUuid, String content, long timestamp) {
         try {
             File contactsDir = wave.SIGNAL_FX_CONTACTS_DIR;
-            Path contactPath = contactsDir.toPath().resolve(senderUuid);
+            Path contactPath = contactsDir.toPath().resolve(userUuid);
             Path messagelog = contactPath.resolve("chatlog");
             Files.createDirectories(contactPath);
             List<String> ct = new LinkedList();
+            ct.add(senderUuid);
             ct.add(content);
             ct.add(Long.toString(timestamp));
             Files.write(messagelog, ct, StandardOpenOption.CREATE, StandardOpenOption.APPEND);
@@ -172,6 +208,7 @@ public class WaveService implements Service, ProvisioningClient, MessagingClient
                                 String uuid = u.getId();
                                 System.err.println("UUID = " + u);
                                 wave.sendMessage(uuid, m.getMessage());
+                                storeMessage(uuid, loggedUser.getId(), m.getMessage(), System.currentTimeMillis());
                             });
                 }
             }
@@ -204,7 +241,7 @@ public class WaveService implements Service, ProvisioningClient, MessagingClient
         int rnd = new Random().nextInt(1000);
         try {
             wave.createAccount(number, "gluon-"+rnd);
-            login("YOU");
+            login(wave.getMyUuid());
             wave.setMessageListener(this);
             wave.syncContacts();
             Platform.runLater(() -> loginPresenter.nextStep());
