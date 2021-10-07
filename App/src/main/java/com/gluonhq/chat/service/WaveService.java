@@ -61,7 +61,17 @@ public class WaveService implements Service, ProvisioningClient, MessagingClient
         if (wave.isInitialized()) {
             login(wave.getMyUuid());
             this.wave.setMessageListener(this);
+            this.wave.ensureConnected();
+//            try {
+//                this.wave.fetchMissedMessages();
+//            } catch (Exception ex) {
+//                Logger.getLogger(WaveService.class.getName()).log(Level.SEVERE, null, ex);
+//            }
         }
+    }
+    
+    @Override public void initializeService() {
+        this.wave.startListening();
     }
 
     @Override
@@ -203,13 +213,15 @@ public class WaveService implements Service, ProvisioningClient, MessagingClient
             public void onChanged(ListChangeListener.Change<? extends ChatMessage> change) {
                 while (change.next()) {
                     System.err.println("Added list: " + change.getAddedSubList());
-                    change.getAddedSubList().stream().filter(m -> m.getLocalOriginated())
+                    List<? extends ChatMessage> addedmsg = change.getAddedSubList();
+                    addedmsg.stream().filter(m -> m.getLocalOriginated())
                             .forEach(m -> {
                                 String uuid = u.getId();
                                 System.err.println("UUID = " + u);
                                 wave.sendMessage(uuid, m.getMessage());
                                 storeMessage(uuid, loggedUser.getId(), m.getMessage(), System.currentTimeMillis());
                             });
+                    answer.setHasUnread(true);
                 }
             }
 

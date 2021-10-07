@@ -70,4 +70,5 @@ public interface Service {
  
     default void bootstrap(LoginPresenter lp) {}
 
+    default void initializeService() {}
 }

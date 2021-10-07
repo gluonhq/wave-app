@@ -50,7 +50,11 @@ public class ChannelCell extends CharmListCell<Channel> {
         */
 
         tile.setTextLine(0, channel.displayName());
-
+        if (channel.isHasUnread()) {
+            System.err.println("UNREAD!");
+            tile.setTextLine(0, "*" + channel.displayName()+"*");
+            channel.setHasUnread(false);
+        }
         tile.setOnMouseReleased(event -> {
             AppViewManager.CHAT_VIEW.getPresenter().ifPresent(presenter -> ((ChatPresenter) presenter).updateMessages(channel));
             // TODO: We want a better way to switch views if the screen size is <= 600
