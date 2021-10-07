@@ -8,7 +8,7 @@ import com.gluonhq.chat.model.ChatImage;
 import com.gluonhq.chat.model.ChatMessage;
 import com.gluonhq.chat.service.ImageUtils;
 import com.gluonhq.chat.service.Service;
-import com.gluonhq.connect.GluonObservableList;
+//import com.gluonhq.connect.GluonObservableList;
 import com.gluonhq.emoji.EmojiData;
 import com.gluonhq.emoji.popup.util.EmojiImageUtils;
 import javafx.animation.PauseTransition;
@@ -231,18 +231,18 @@ class MessageCell extends CharmListCell<ChatMessage> {
         }
 
         final ObservableList<ChatImage> images = service.getImages();
-        if (images instanceof GluonObservableList) {
-            GluonObservableList<ChatImage> chatImages = (GluonObservableList<ChatImage>) images;
-            if (!chatImages.isInitialized()) {
-                ImageView imageView = ImageUtils.getImageView(loading);
-                chatImages.setOnSucceeded(e ->
-                        formatImage(value).ifPresent(iv -> {
-                            imageView.setImage(iv.getImage());
-                            getListView().refresh();
-                        }));
-                return Optional.of(imageView);
-            }
-        }
+//        if (images instanceof GluonObservableList) {
+//            GluonObservableList<ChatImage> chatImages = (GluonObservableList<ChatImage>) images;
+//            if (!chatImages.isInitialized()) {
+//                ImageView imageView = ImageUtils.getImageView(loading);
+//                chatImages.setOnSucceeded(e ->
+//                        formatImage(value).ifPresent(iv -> {
+//                            imageView.setImage(iv.getImage());
+//                            getListView().refresh();
+//                        }));
+//                return Optional.of(imageView);
+//            }
+//        }
 
         return images.stream()
                 .filter(chatImage -> chatImage != null && chatImage.getId() != null)

@@ -7,11 +7,20 @@ import java.util.UUID;
 
 public class Channel extends Searchable {
 
+    public boolean isHasUnread() {
+        return hasUnread;
+    }
+
+    public void setHasUnread(boolean hasUnread) {
+        this.hasUnread = hasUnread;
+    }
+
     private final String id;
     private String name;
     private boolean isDirect;
     private final ObservableList<User> members;
     private final ObservableList<ChatMessage> messages;
+    private boolean hasUnread = false;
 
     public Channel(String name, ObservableList<User> members, ObservableList<ChatMessage> messages) {
         this.id = UUID.randomUUID().toString();
