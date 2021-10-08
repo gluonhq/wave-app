@@ -19,6 +19,11 @@ import java.io.IOException;
 import java.util.logging.Level;
 import java.util.logging.LogManager;
 import java.util.logging.Logger;
+import java.security.*;
+
+import org.bouncycastle.jcajce.provider.keystore.BC;
+import org.bouncycastle.jcajce.provider.keystore.bc.*;
+import org.bouncycastle.jce.provider.BouncyCastleProvider;
 
 public class GluonChat extends MobileApplication {
 
@@ -48,6 +53,19 @@ public class GluonChat extends MobileApplication {
 
     @Override
     public void init() {
+        Security.addProvider(new BouncyCastleProvider());
+        Security.setProperty("crypto.policy", "unlimited");
+try {
+        System.err.println("hello world");
+        Security.addProvider(new BouncyCastleProvider());
+        Security.setProperty("crypto.policy", "unlimited");
+
+       KeyStore    keyStore            = KeyStore.getInstance("BKS");
+        System.err.println("keystore = " + keyStore);
+} catch (Exception e) {
+e.printStackTrace();
+}
+
         AppViewManager.registerViewsAndDrawer(this);
     }
 
@@ -73,6 +91,8 @@ public class GluonChat extends MobileApplication {
 
     public static void main(String[] args) {
 //        System.setProperty("charm-desktop-form", "tablet");
+BC bc = new BC();
+BcKeyStoreSpi.Std a = new BcKeyStoreSpi.Std();
         launch(args);
     }
 }
