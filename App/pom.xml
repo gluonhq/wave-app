@@ -74,6 +74,7 @@
                 <artifactId>gluonfx-maven-plugin</artifactId>
                 <version>${gluonfx-maven-plugin-version}</version>
                 <configuration>
+<verbose>false</verbose>
                     <target>${gluonfxTarget}</target>
                     <attachList>
                         <list>cache</list>
@@ -100,6 +101,7 @@
                     </bundlesList>
                     <resourcesList>
                         <item>logging.properties</item>
+<item>whisper.store</item>
                     </resourcesList>
                     <reflectionList>
                         <list>com.gluonhq.charm.glisten.control.TextField</list>
@@ -228,6 +230,17 @@
             <scope>runtime</scope>
             <classifier>module</classifier>
         </dependency>
+        <dependency>
+          <groupId>org.bouncycastle</groupId>
+          <artifactId>bcpkix-jdk15on</artifactId>
+          <version>1.58</version>
+        </dependency>
+        <dependency>
+          <groupId>org.bouncycastle</groupId>
+          <artifactId>bcprov-jdk15on</artifactId>
+          <version>1.58</version>
+        </dependency>
+
         
         <!-- Attach -->
         <dependency>
