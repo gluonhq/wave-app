@@ -62,11 +62,6 @@ public class WaveService implements Service, ProvisioningClient, MessagingClient
             login(wave.getMyUuid());
             this.wave.setMessageListener(this);
             this.wave.ensureConnected();
-//            try {
-//                this.wave.fetchMissedMessages();
-//            } catch (Exception ex) {
-//                Logger.getLogger(WaveService.class.getName()).log(Level.SEVERE, null, ex);
-//            }
         }
     }
     
