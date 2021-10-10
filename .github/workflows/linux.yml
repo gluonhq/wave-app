@@ -2,7 +2,9 @@ name: Linux
 
 on:
   push:
-    branches: [ master ]
+    branches:
+      - main
+      - wave2
 
 jobs:
   build:
