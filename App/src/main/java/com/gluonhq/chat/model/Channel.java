@@ -7,20 +7,12 @@ import java.util.UUID;
 
 public class Channel extends Searchable {
 
-    public boolean isHasUnread() {
-        return hasUnread;
-    }
-
-    public void setHasUnread(boolean hasUnread) {
-        this.hasUnread = hasUnread;
-    }
-
     private final String id;
     private String name;
     private boolean isDirect;
     private final ObservableList<User> members;
     private final ObservableList<ChatMessage> messages;
-    private boolean hasUnread = false;
+    private boolean unread;
 
     public Channel(String name, ObservableList<User> members, ObservableList<ChatMessage> messages) {
         this.id = UUID.randomUUID().toString();
@@ -68,6 +60,24 @@ public class Channel extends Searchable {
 
     public ObservableList<ChatMessage> getMessages() {
         return messages;
+    }
+
+    /**
+     * Checks if this channel contains messages that are not yet read by this 
+     * user
+     * @return true if there are new messages in this channel, false otherwise 
+     */
+    public boolean isUnread() {
+        return unread;
+    }
+
+    /**
+     * Sets the unread status of this channel to true if there are messages not
+     * yet read by the user, or to false otherwise
+     * @param unread true if there are unread messages, false otherwise
+     */
+    public void setUnread(boolean unread) {
+        this.unread = unread;
     }
 
     @Override

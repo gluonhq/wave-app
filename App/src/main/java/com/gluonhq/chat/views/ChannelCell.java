@@ -11,11 +11,14 @@ import java.nio.file.Path;
 import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
 
+import javafx.css.PseudoClass;
+
 public class ChannelCell extends CharmListCell<Channel> {
 
     static final int AVATAR_SIZE = 64;
     
     private final ListTile tile;
+    private static final PseudoClass PSEUDO_CLASS_UNREAD = PseudoClass.getPseudoClass("unread");
 
     public ChannelCell() {
         tile = new ListTile();
@@ -43,6 +46,7 @@ public class ChannelCell extends CharmListCell<Channel> {
                 }
             }
         }
+        pseudoClassStateChanged(PSEUDO_CLASS_UNREAD, channel!= null && channel.isUnread());
         /* TODO: Add User Image
         final Avatar avatar = new Avatar;
         avatar.setMouseTransparent(true);
@@ -50,10 +54,10 @@ public class ChannelCell extends CharmListCell<Channel> {
         */
 
         tile.setTextLine(0, channel.displayName());
-        if (channel.isHasUnread()) {
+        if (channel.isUnread()) {
             System.err.println("UNREAD!");
             tile.setTextLine(0, "*" + channel.displayName()+"*");
-            channel.setHasUnread(false);
+            channel.setUnread(false);
         }
         tile.setOnMouseReleased(event -> {
             AppViewManager.CHAT_VIEW.getPresenter().ifPresent(presenter -> ((ChatPresenter) presenter).updateMessages(channel));
