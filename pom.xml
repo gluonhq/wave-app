@@ -27,7 +27,7 @@
         <glistenAfterburnerVersion>2.0.5</glistenAfterburnerVersion>
         <attachVersion>4.0.12</attachVersion>
         <mapsVersion>2.0.0-ea+5</mapsVersion>
-        <connectVersion>2.0.2-SNAPSHOT</connectVersion>
+        <connectVersion>2.0.1</connectVersion>
         <javafxVersion>16</javafxVersion>
         <controlsfxVersion>11.1.0</controlsfxVersion>
         <javafx-maven-plugin-version>0.0.6</javafx-maven-plugin-version>
