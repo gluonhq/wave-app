@@ -155,7 +155,7 @@
         <dependency>
             <groupId>com.gluonhq</groupId>
             <artifactId>wave</artifactId>
-            <version>0.1.6</version>
+            <version>0.1.7-SNAPSHOT</version>
         </dependency>
         <dependency>
             <groupId>com.google.zxing</groupId>
@@ -229,17 +229,6 @@
             <scope>runtime</scope>
             <classifier>module</classifier>
         </dependency>
-        <dependency>
-          <groupId>org.bouncycastle</groupId>
-          <artifactId>bcpkix-jdk15on</artifactId>
-          <version>1.58</version>
-        </dependency>
-        <dependency>
-          <groupId>org.bouncycastle</groupId>
-          <artifactId>bcprov-jdk15on</artifactId>
-          <version>1.58</version>
-        </dependency>
-
         
         <!-- Attach -->
         <dependency>
