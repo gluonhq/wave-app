@@ -157,11 +157,6 @@
             <artifactId>wave</artifactId>
             <version>0.1.7-SNAPSHOT</version>
         </dependency>
-        <dependency>
-            <groupId>com.google.zxing</groupId>
-            <artifactId>core</artifactId>
-            <version>3.4.1</version>
-        </dependency>
 
         <dependency>
             <groupId>javax.annotation</groupId>
@@ -194,11 +189,6 @@
                     <artifactId>*</artifactId>
                 </exclusion>
             </exclusions>
-        </dependency>
-        <dependency>
-            <groupId>com.gluonhq</groupId>
-            <artifactId>connect</artifactId>
-            <version>${connectVersion}</version>
         </dependency>
         <dependency>
             <groupId>com.gluonhq</groupId>
