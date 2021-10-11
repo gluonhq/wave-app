@@ -81,8 +81,5 @@ public interface Service {
             return "";
         }
     }
- 
-    default void bootstrap(LoginPresenter lp) {}
 
-    default void initializeService() {}
 }

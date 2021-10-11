@@ -38,8 +38,6 @@ import javafx.beans.InvalidationListener;
 import javafx.beans.Observable;
 import javafx.collections.ListChangeListener;
 
-import org.bouncycastle.jce.provider.BouncyCastleProvider;
-
 public class WaveService implements Service, ProvisioningClient, MessagingClient {
     
     private User loggedUser;
@@ -49,11 +47,6 @@ public class WaveService implements Service, ProvisioningClient, MessagingClient
     boolean channelsClean = false;
     private ObservableList<Contact> contacts;
     private BootstrapClient bootstrapClient;
-    
-    static {
-        Security.addProvider(new BouncyCastleProvider());
-        Security.setProperty("crypto.policy", "unlimited");
-    }
 
     public WaveService() {
         wave = WaveManager.getInstance();
@@ -192,7 +185,7 @@ public class WaveService implements Service, ProvisioningClient, MessagingClient
     }
 
     @Override
-    public void bootstrap(LoginPresenter loginPresenter) {
+    public void bootstrap(BootstrapClient loginPresenter) {
         this.bootstrapClient = loginPresenter;
         Runnable r = () -> wave.startProvisioning(this);
         Thread t = new Thread(r);
@@ -216,7 +209,7 @@ public class WaveService implements Service, ProvisioningClient, MessagingClient
                                 wave.sendMessage(uuid, m.getMessage());
                                 storeMessage(uuid, loggedUser.getId(), m.getMessage(), System.currentTimeMillis());
                             });
-                    answer.setHasUnread(true);
+                    answer.setUnread(true);
                 }
             }
 
