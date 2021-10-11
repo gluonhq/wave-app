@@ -21,10 +21,6 @@ import java.util.logging.LogManager;
 import java.util.logging.Logger;
 import java.security.*;
 
-import org.bouncycastle.jcajce.provider.keystore.BC;
-import org.bouncycastle.jcajce.provider.keystore.bc.*;
-import org.bouncycastle.jce.provider.BouncyCastleProvider;
-
 public class GluonChat extends MobileApplication {
 
     private static final Logger LOG = Logger.getLogger(GluonChat.class.getName());
@@ -47,25 +43,13 @@ public class GluonChat extends MobileApplication {
 
     private static final GluonInstanceProvider instanceSupplier = new GluonInstanceProvider() {{
         // bindProvider(Service.class, CloudlinkService::new);
+        // bindProvider(Service.class, DummyService::new);
         bindProvider(Service.class, WaveService::new);
         Injector.setInstanceSupplier(this);
     }};
 
     @Override
     public void init() {
-        Security.addProvider(new BouncyCastleProvider());
-        Security.setProperty("crypto.policy", "unlimited");
-try {
-        System.err.println("hello world");
-        Security.addProvider(new BouncyCastleProvider());
-        Security.setProperty("crypto.policy", "unlimited");
-
-       KeyStore    keyStore            = KeyStore.getInstance("BKS");
-        System.err.println("keystore = " + keyStore);
-} catch (Exception e) {
-e.printStackTrace();
-}
-
         AppViewManager.registerViewsAndDrawer(this);
     }
 
@@ -90,9 +74,6 @@ e.printStackTrace();
     }
 
     public static void main(String[] args) {
-//        System.setProperty("charm-desktop-form", "tablet");
-BC bc = new BC();
-BcKeyStoreSpi.Std a = new BcKeyStoreSpi.Std();
         launch(args);
     }
 }
