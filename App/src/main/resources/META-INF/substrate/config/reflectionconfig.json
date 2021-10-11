@@ -1,10 +1,4 @@
 [
-  {
-    "name":"com.gluonhq.maps.MapView",
-    "methods":[
-      {"name":"<init>","parameterTypes":[] }
-    ]
-  },
 {
   "name":"byte[]"
 },
@@ -95,12 +89,6 @@
   "methods":[{"name":"<init>","parameterTypes":[] }]
 },
 {
-  "name":"com.gluonhq.chat.views.PortraitPresenter",
-  "allDeclaredFields":true,
-  "allDeclaredMethods":true,
-  "methods":[{"name":"<init>","parameterTypes":[] }]
-},
-{
   "name":"com.gluonhq.impl.charm.glisten.control.skin.GlistenButtonSkin",
   "allPublicConstructors":true
 },
@@ -168,10 +156,6 @@
   ]
 },
 {
-  "name":"com.sun.prism.es2.ES2Pipeline",
-  "methods":[{"name":"getInstance","parameterTypes":[] }]
-},
-{
   "name":"com.sun.prism.shader.DrawPgram_Color_Loader",
   "methods":[{"name":"loadShader","parameterTypes":["com.sun.prism.ps.ShaderFactory","java.io.InputStream"] }]
 },
@@ -210,10 +194,6 @@
 {
   "name":"com.sun.prism.shader.Texture_LinearGradient_PAD_Loader",
   "methods":[{"name":"loadShader","parameterTypes":["com.sun.prism.ps.ShaderFactory","java.io.InputStream"] }]
-},
-{
-  "name":"com.sun.scenario.effect.impl.es2.ES2ShaderSource",
-  "methods":[{"name":"<init>","parameterTypes":[] }]
 },
 {
   "name":"com.sun.scenario.effect.impl.prism.PrRenderer",
@@ -273,7 +253,7 @@
 },
 {
   "name":"java.nio.Buffer",
-  "fields":[{"name":"address", "allowUnsafeAccess":true}]
+  "fields":[{"name":"address"}]
 },
 {
   "name":"java.nio.ByteBuffer",
@@ -1673,6 +1653,10 @@
   "methods":[{"name":"newBuilder","parameterTypes":[] }]
 },
 {
+  "name":"sun.java2d.marlin.DMarlinRenderingEngine",
+  "methods":[{"name":"<init>","parameterTypes":[] }]
+},
+{
   "name":"sun.misc.Unsafe",
   "allDeclaredFields":true,
   "methods":[
@@ -1705,14 +1689,6 @@
 },
 {
   "name":"sun.security.provider.DSA$SHA224withDSA",
-  "methods":[{"name":"<init>","parameterTypes":[] }]
-},
-{
-  "name":"sun.security.provider.JavaKeyStore$DualFormatJKS",
-  "methods":[{"name":"<init>","parameterTypes":[] }]
-},
-{
-  "name":"sun.security.provider.JavaKeyStore$JKS",
   "methods":[{"name":"<init>","parameterTypes":[] }]
 },
 {
@@ -1784,43 +1760,11 @@
   "methods":[{"name":"<init>","parameterTypes":[] }]
 },
 {
-  "name":"sun.security.x509.AuthorityInfoAccessExtension",
-  "methods":[{"name":"<init>","parameterTypes":["java.lang.Boolean","java.lang.Object"] }]
-},
-{
   "name":"sun.security.x509.AuthorityKeyIdentifierExtension",
   "methods":[{"name":"<init>","parameterTypes":["java.lang.Boolean","java.lang.Object"] }]
 },
 {
   "name":"sun.security.x509.BasicConstraintsExtension",
-  "methods":[{"name":"<init>","parameterTypes":["java.lang.Boolean","java.lang.Object"] }]
-},
-{
-  "name":"sun.security.x509.CRLDistributionPointsExtension",
-  "methods":[{"name":"<init>","parameterTypes":["java.lang.Boolean","java.lang.Object"] }]
-},
-{
-  "name":"sun.security.x509.CertificatePoliciesExtension",
-  "methods":[{"name":"<init>","parameterTypes":["java.lang.Boolean","java.lang.Object"] }]
-},
-{
-  "name":"sun.security.x509.ExtendedKeyUsageExtension",
-  "methods":[{"name":"<init>","parameterTypes":["java.lang.Boolean","java.lang.Object"] }]
-},
-{
-  "name":"sun.security.x509.IssuerAlternativeNameExtension",
-  "methods":[{"name":"<init>","parameterTypes":["java.lang.Boolean","java.lang.Object"] }]
-},
-{
-  "name":"sun.security.x509.KeyUsageExtension",
-  "methods":[{"name":"<init>","parameterTypes":["java.lang.Boolean","java.lang.Object"] }]
-},
-{
-  "name":"sun.security.x509.NetscapeCertTypeExtension",
-  "methods":[{"name":"<init>","parameterTypes":["java.lang.Boolean","java.lang.Object"] }]
-},
-{
-  "name":"sun.security.x509.PrivateKeyUsageExtension",
   "methods":[{"name":"<init>","parameterTypes":["java.lang.Boolean","java.lang.Object"] }]
 },
 {
