@@ -48,7 +48,7 @@ public class WaveService implements Service, ProvisioningClient, MessagingClient
     Map<Channel, ObservableList<ChatMessage>> channelMap = new HashMap<>();
     boolean channelsClean = false;
     private ObservableList<Contact> contacts;
-    private LoginPresenter loginPresenter;
+    private BootstrapClient bootstrapClient;
     
     static {
         Security.addProvider(new BouncyCastleProvider());
@@ -193,7 +193,7 @@ public class WaveService implements Service, ProvisioningClient, MessagingClient
 
     @Override
     public void bootstrap(LoginPresenter loginPresenter) {
-        this.loginPresenter = loginPresenter;
+        this.bootstrapClient = loginPresenter;
         Runnable r = () -> wave.startProvisioning(this);
         Thread t = new Thread(r);
         t.start();
@@ -240,7 +240,7 @@ public class WaveService implements Service, ProvisioningClient, MessagingClient
     @Override
     public void gotProvisioningUrl(String url) {
         Image image = QRGenerator.getImage(url);
-        javafx.application.Platform.runLater(() -> loginPresenter.getQrImageView().setImage(image));
+        javafx.application.Platform.runLater(() -> bootstrapClient.gotImage(image));
     }
 
     @Override
@@ -251,7 +251,7 @@ public class WaveService implements Service, ProvisioningClient, MessagingClient
             login(wave.getMyUuid());
             wave.setMessageListener(this);
             wave.syncContacts();
-            Platform.runLater(() -> loginPresenter.nextStep());
+            Platform.runLater(() -> bootstrapClient.bootstrapSucceeded());
 
         } catch (Exception ex) {
             ex.printStackTrace();
