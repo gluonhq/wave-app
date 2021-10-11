@@ -1673,14 +1673,6 @@
   "methods":[{"name":"newBuilder","parameterTypes":[] }]
 },
 {
-  "name":"sun.awt.X11GraphicsEnvironment",
-  "methods":[{"name":"<init>","parameterTypes":[] }]
-},
-{
-  "name":"sun.java2d.marlin.DMarlinRenderingEngine",
-  "methods":[{"name":"<init>","parameterTypes":[] }]
-},
-{
   "name":"sun.misc.Unsafe",
   "allDeclaredFields":true,
   "methods":[
