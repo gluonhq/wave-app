@@ -4,43 +4,36 @@ import com.gluonhq.chat.model.Channel;
 import com.gluonhq.chat.model.ChatImage;
 import com.gluonhq.chat.model.ChatMessage;
 import com.gluonhq.chat.model.User;
-import com.gluonhq.chat.views.LoginPresenter;
-
-import com.gluonhq.wave.model.Contact;
-//import com.gluonhq.wave.QRGenerator;
 import com.gluonhq.wave.WaveManager;
 import com.gluonhq.wave.message.MessagingClient;
+import com.gluonhq.wave.model.Contact;
 import com.gluonhq.wave.provision.ProvisioningClient;
 import com.gluonhq.wave.util.QRGenerator;
 import java.io.File;
 import java.io.IOException;
+import java.lang.System.Logger.Level;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.StandardOpenOption;
-import java.time.LocalDateTime;
-import java.security.Security;
 import java.time.Instant;
+import java.time.LocalDateTime;
 import java.time.ZoneId;
-
 import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.Random;
-import java.util.logging.Level;
-import java.util.logging.Logger;
-import javafx.collections.FXCollections;
-import javafx.collections.ObservableList;
-import javafx.scene.image.Image;
-
 import java.util.stream.Collectors;
 import javafx.application.Platform;
 import javafx.beans.InvalidationListener;
 import javafx.beans.Observable;
+import javafx.collections.FXCollections;
 import javafx.collections.ListChangeListener;
+import javafx.collections.ObservableList;
+import javafx.scene.image.Image;
 
 public class WaveService implements Service, ProvisioningClient, MessagingClient {
-
+  
     private User loggedUser;
     private final WaveManager wave;
     ObservableList<Channel> channels = FXCollections.observableArrayList();
@@ -51,6 +44,7 @@ public class WaveService implements Service, ProvisioningClient, MessagingClient
 
     public WaveService() {
         wave = WaveManager.getInstance();
+        wave.setLogLevel(Level.INFO);
         System.err.println("Creating waveService: " + System.identityHashCode(wave));
         if (wave.isProvisioned()) {
             login(wave.getMyUuid());
@@ -59,7 +53,6 @@ public class WaveService implements Service, ProvisioningClient, MessagingClient
                 this.wave.ensureConnected();
             } catch (IOException ex) {
                 ex.printStackTrace();
-                Logger.getLogger(WaveService.class.getName()).log(Level.SEVERE, null, ex);
                 System.err.println("We're offline. Not much we can do now!");
             }
         }
@@ -135,15 +128,12 @@ public class WaveService implements Service, ProvisioningClient, MessagingClient
             Path contactPath = contactsDir.toPath().resolve(id);
             Path messagelog = contactPath.resolve("chatlog");
             if (!Files.exists(messagelog)) {
-                System.err.println("no chatlog for " + id);
                 return;
             }
-            System.err.println("WE GOT A CAT!");
             List<String> lines = Files.readAllLines(messagelog);
             int cnt = lines.size();
             for (int i = 0; i < cnt; i = i + 3) {
                 String senderuuid = lines.get(i);
-                System.err.println("senderuuid = " + senderuuid + " and me = " + this.loggedUser.getId());
                 String content = lines.get(i + 1);
                 long timestamp = Long.parseLong(lines.get(i + 2));
                 Instant instant = Instant.ofEpochMilli(timestamp);
@@ -151,7 +141,6 @@ public class WaveService implements Service, ProvisioningClient, MessagingClient
                 User author = this.loggedUser.getId().equals(senderuuid) ? this.loggedUser : user;
                 ChatMessage cm = new ChatMessage(content, author, ldt);
                 c.getMessages().add(cm);
-                System.err.println("added " + cm + " for " + user);
             }
         } catch (IOException ex) {
             ex.printStackTrace();
@@ -217,7 +206,7 @@ public class WaveService implements Service, ProvisioningClient, MessagingClient
                                 try {
                                     wave.sendMessage(uuid, m.getMessage());
                                 } catch (IOException ex) {
-                                    Logger.getLogger(WaveService.class.getName()).log(Level.SEVERE, null, ex);
+                                    ex.printStackTrace();
                                 }
                                 storeMessage(uuid, loggedUser.getId(), m.getMessage(), System.currentTimeMillis());
                             });
@@ -229,18 +218,6 @@ public class WaveService implements Service, ProvisioningClient, MessagingClient
         return answer;
     }
 
-    private static User createUserFromContact(Contact c) {
-        String firstName = c.getName();
-        if ((c.getName() == null) || (c.getName().isEmpty())) {
-            firstName = c.getNr();
-            if ((firstName == null) || (firstName.isEmpty())) {
-                firstName = c.getUuid();
-            }
-        }
-        User answer = new User(firstName, firstName, "", c.getUuid());
-        answer.setAvatarPath(c.getAvatarPath());
-        return answer;
-    }
 
     @Override
     public void gotProvisioningUrl(String url) {
@@ -256,7 +233,6 @@ public class WaveService implements Service, ProvisioningClient, MessagingClient
             wave.createAccount(number, "Gluon-" + rnd);
             System.err.println("[WAVESERVICE] login");
             login(wave.getMyUuid());
-            System.err.println("[WAVESERVICE] set ml");
 
             wave.setMessageListener(this);
             System.err.println("[WAVESERVICE] synccontacts");
@@ -266,6 +242,18 @@ public class WaveService implements Service, ProvisioningClient, MessagingClient
         } catch (Exception ex) {
             ex.printStackTrace();
         }
+    }
+  private static User createUserFromContact(Contact c) {
+        String firstName = c.getName();
+        if ((c.getName() == null) || (c.getName().isEmpty())) {
+            firstName = c.getNr();
+            if ((firstName == null) || (firstName.isEmpty())) {
+                firstName = c.getUuid();
+            }
+        }
+        User answer = new User(firstName, firstName, "", c.getUuid());
+        answer.setAvatarPath(c.getAvatarPath());
+        return answer;
     }
 
 }
