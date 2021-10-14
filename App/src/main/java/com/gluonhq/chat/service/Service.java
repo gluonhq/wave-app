@@ -4,7 +4,6 @@ import com.gluonhq.chat.model.Channel;
 import com.gluonhq.chat.model.ChatImage;
 import com.gluonhq.chat.model.ChatMessage;
 import com.gluonhq.chat.model.User;
-import com.gluonhq.chat.views.LoginPresenter;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import javafx.scene.image.Image;

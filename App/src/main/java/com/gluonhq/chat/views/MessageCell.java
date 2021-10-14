@@ -41,6 +41,7 @@ import java.util.regex.Pattern;
 
 import static com.gluonhq.chat.service.ImageUtils.IMAGE_PREFIX;
 import static com.gluonhq.chat.service.ImageUtils.LATLON;
+import com.gluonhq.connect.GluonObservableList;
 
 class MessageCell extends CharmListCell<ChatMessage> {
 
@@ -231,18 +232,18 @@ class MessageCell extends CharmListCell<ChatMessage> {
         }
 
         final ObservableList<ChatImage> images = service.getImages();
-//        if (images instanceof GluonObservableList) {
-//            GluonObservableList<ChatImage> chatImages = (GluonObservableList<ChatImage>) images;
-//            if (!chatImages.isInitialized()) {
-//                ImageView imageView = ImageUtils.getImageView(loading);
-//                chatImages.setOnSucceeded(e ->
-//                        formatImage(value).ifPresent(iv -> {
-//                            imageView.setImage(iv.getImage());
-//                            getListView().refresh();
-//                        }));
-//                return Optional.of(imageView);
-//            }
-//        }
+        if (images instanceof GluonObservableList) {
+            GluonObservableList<ChatImage> chatImages = (GluonObservableList<ChatImage>) images;
+            if (!chatImages.isInitialized()) {
+                ImageView imageView = ImageUtils.getImageView(loading);
+                chatImages.setOnSucceeded(e ->
+                        formatImage(value).ifPresent(iv -> {
+                            imageView.setImage(iv.getImage());
+                            getListView().refresh();
+                        }));
+                return Optional.of(imageView);
+            }
+        }
 
         return images.stream()
                 .filter(chatImage -> chatImage != null && chatImage.getId() != null)

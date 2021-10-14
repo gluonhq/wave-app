@@ -100,7 +100,7 @@
                     </bundlesList>
                     <resourcesList>
                         <item>logging.properties</item>
-<item>whisper.store</item>
+                        <item>whisper.store</item>
                     </resourcesList>
                     <reflectionList>
                         <list>com.gluonhq.charm.glisten.control.TextField</list>
@@ -119,7 +119,7 @@
 <!--                        <list>com.gluonhq.attach.orientation.impl.DesktopOrientationService</list>-->
 <!--                        <list>com.gluonhq.attach.position.impl.DesktopPositionService</list>-->
                     </reflectionList>
-                    <verbose>false</verbose>
+                        <verbose>false</verbose>
                     <mainClass>${mainClassName}</mainClass>
                     <releaseConfiguration>
                         <appLabel>ChatApp</appLabel>
@@ -155,7 +155,7 @@
         <dependency>
             <groupId>com.gluonhq</groupId>
             <artifactId>wave</artifactId>
-            <version>0.9.0-SNAPSHOT</version>
+            <version>0.9.0</version>
         </dependency>
 
         <dependency>

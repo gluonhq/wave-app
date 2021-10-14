@@ -33,7 +33,7 @@ import javafx.collections.ObservableList;
 import javafx.scene.image.Image;
 
 public class WaveService implements Service, ProvisioningClient, MessagingClient {
-  
+
     private User loggedUser;
     private final WaveManager wave;
     ObservableList<Channel> channels = FXCollections.observableArrayList();
@@ -65,7 +65,7 @@ public class WaveService implements Service, ProvisioningClient, MessagingClient
 
     @Override
     public ObservableList<ChatImage> getImages() {
-        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+        return FXCollections.emptyObservableList();
     }
 
     @Override
@@ -154,7 +154,8 @@ public class WaveService implements Service, ProvisioningClient, MessagingClient
 
     @Override
     public void gotMessage(String senderUuid, String content, long timestamp) {
-        System.err.println("GOT MESSAGE from " + senderUuid + " with content " + content);
+        wave.getWaveLogger().log(Level.DEBUG, 
+                "GOT MESSAGE from " + senderUuid + " with content " + content);
         Channel dest = this.channels.stream()
                 .filter(c -> c.getMembers().size() > 0)
                 .filter(c -> c.getMembers().get(0).getId().equals(senderUuid))
@@ -162,7 +163,6 @@ public class WaveService implements Service, ProvisioningClient, MessagingClient
         ChatMessage chatMessage = new ChatMessage(content, dest.getMembers().get(0), LocalDateTime.now());
         Platform.runLater(() -> dest.getMessages().add(chatMessage));
         storeMessage(senderUuid, senderUuid, content, timestamp);
-        System.err.println("Message is for " + dest + " and its messages are now " + dest.getMessages());
     }
 
     private void storeMessage(String userUuid, String senderUuid, String content, long timestamp) {
@@ -197,12 +197,10 @@ public class WaveService implements Service, ProvisioningClient, MessagingClient
             @Override
             public void onChanged(ListChangeListener.Change<? extends ChatMessage> change) {
                 while (change.next()) {
-                    System.err.println("Added list: " + change.getAddedSubList());
                     List<? extends ChatMessage> addedmsg = change.getAddedSubList();
                     addedmsg.stream().filter(m -> m.getLocalOriginated())
                             .forEach(m -> {
                                 String uuid = u.getId();
-                                System.err.println("UUID = " + u);
                                 try {
                                     wave.sendMessage(uuid, m.getMessage());
                                 } catch (IOException ex) {
@@ -229,13 +227,12 @@ public class WaveService implements Service, ProvisioningClient, MessagingClient
     public void gotProvisionMessage(String number) {
         int rnd = new Random().nextInt(1000);
         try {
-            System.err.println("[WAVESERVICE] rnd = "+rnd+", create account");
+            wave.getWaveLogger().log(Level.DEBUG, "[WAVESERVICE] rnd = "+rnd+", create account");
             wave.createAccount(number, "Gluon-" + rnd);
-            System.err.println("[WAVESERVICE] login");
             login(wave.getMyUuid());
 
             wave.setMessageListener(this);
-            System.err.println("[WAVESERVICE] synccontacts");
+            wave.getWaveLogger().log(Level.DEBUG, "[WAVESERVICE] synccontacts");
             wave.syncContacts();
             Platform.runLater(() -> bootstrapClient.bootstrapSucceeded());
 
@@ -243,7 +240,8 @@ public class WaveService implements Service, ProvisioningClient, MessagingClient
             ex.printStackTrace();
         }
     }
-  private static User createUserFromContact(Contact c) {
+
+    private static User createUserFromContact(Contact c) {
         String firstName = c.getName();
         if ((c.getName() == null) || (c.getName().isEmpty())) {
             firstName = c.getNr();

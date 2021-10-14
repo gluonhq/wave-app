@@ -19,7 +19,6 @@ import java.io.IOException;
 import java.util.logging.Level;
 import java.util.logging.LogManager;
 import java.util.logging.Logger;
-import java.security.*;
 
 public class GluonChat extends MobileApplication {
 
