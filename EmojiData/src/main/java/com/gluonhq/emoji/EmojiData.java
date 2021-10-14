@@ -28,7 +28,6 @@ public class EmojiData {
     private static final Map<String, Emoji> EMOJI_MAP = new HashMap<>();
 
     static  {
-/*
         try (final InputStream emojiStream = EmojiData.class.getResourceAsStream("emoji.json")) {
             InputDataSource dataSource = new BasicInputDataSource(emojiStream);
             InputStreamIterableInputConverter<Emoji> converter = new JsonIterableInputConverter<>(Emoji.class);
@@ -43,7 +42,6 @@ public class EmojiData {
             System.err.println("Could not load emoji json file" + e.getMessage());
 //            throw new IllegalStateException("Could not load emoji json file" + e.getMessage());
         }
-*/
     }
     
     public static Optional<Emoji> emojiFromShortName(String shortName) {
