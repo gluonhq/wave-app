@@ -37,7 +37,6 @@ public class WaveService implements Service, ProvisioningClient, MessagingClient
 
     private User loggedUser;
     private final WaveManager wave;
-    //ObservableList<Channel> channels = FXCollections.observableArrayList();
     Map<Channel, ObservableList<ChatMessage>> channelMap = new HashMap<>();
     boolean channelsClean = false;
     private ObservableList<Contact> contacts;
@@ -48,7 +47,7 @@ public class WaveService implements Service, ProvisioningClient, MessagingClient
     public WaveService() {
         wave = WaveManager.getInstance();
         wave.setLogLevel(Level.DEBUG);
-        System.err.println("Creating waveService: " + System.identityHashCode(wave));
+        wave.getWaveLogger().log(Level.DEBUG, "Creating waveService: " + System.identityHashCode(wave));
         if (wave.isProvisioned()) {
             login(wave.getMyUuid());
             this.wave.setMessageListener(this);
@@ -105,19 +104,9 @@ public class WaveService implements Service, ProvisioningClient, MessagingClient
                             .filter(opt -> opt.isPresent())
                             .map(opt -> opt.get()).collect(Collectors.toList());
                     answer.removeAll(removedUsers);
-                    System.err.println("contact -> user: added " + addedUsers.size() + " and removed " + removedUsers.size());
                 }
             }
         });
-//        contacts.addListener(new InvalidationListener() {
-//            @Override
-//            public void invalidated(Observable o) {
-//                answer.clear();
-//                answer.addAll(contacts.stream()
-//                        .map(a -> createUserFromContact(a))
-//                        .collect(Collectors.toList()));
-//            }
-//        });
         return answer;
     }
 
@@ -137,36 +126,15 @@ public class WaveService implements Service, ProvisioningClient, MessagingClient
         answer.forEach(c -> readMessageForChannel(c));
         users.addListener(new ListChangeListener<User>() {
             @Override
-
             public void onChanged(ListChangeListener.Change<? extends User> change) {
-
                 while (change.next()) {
                     List<Channel> addedChannels = change.getAddedSubList().stream()
                             .map(user -> createChannelFromUser(user))
                             .collect(Collectors.toList());
                     answer.addAll(addedChannels);
-//                    List<Channel> removedChannels = change.getRemoved().stream()
-//                            .map(user -> findChannelByUser(user, answer))
-//                            .filter(opt -> opt.isPresent())
-//                            .map(opt -> opt.get()).collect(Collectors.toList());
-//                    answer.removeAll(removedUsers);
-                    System.err.println("contact -> user: added " + addedChannels.size() + " and SHOULD HAVE removed " + change.getRemoved().size());
                 }
-
             }
         });
-
-//            users.addListener(new InvalidationListener() {
-//                @Override
-//                public void invalidated(Observable o) {
-//                    Platform.runLater(() -> {
-//                        channels.clear();
-//                        channelMap.clear();
-//                        channels.addAll(users.stream().map(user -> createChannelFromUser(user))
-//                                .collect(Collectors.toList()));
-//                    });
-//                }
-//            });
         return answer;
     }
 
