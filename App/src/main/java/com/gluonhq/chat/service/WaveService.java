@@ -25,6 +25,7 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.Random;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
 import javafx.application.Platform;
 import javafx.beans.InvalidationListener;
 import javafx.beans.Observable;
@@ -204,15 +205,21 @@ public class WaveService implements Service, ProvisioningClient, MessagingClient
 
     @Override
     public void gotMessage(String senderUuid, String content, long timestamp) {
+        gotMessage(senderUuid, content, timestamp, senderUuid);
+    }
+
+    @Override
+    public void gotMessage(String senderUuid, String content, long timestamp, String receiverUuid) {
         wave.getWaveLogger().log(Level.DEBUG,
-                "GOT MESSAGE from " + senderUuid + " with content " + content);
+                "GOT MESSAGE from " + senderUuid + " for "+ receiverUuid+" with content " + content);
         Channel dest = this.channels.stream()
                 .filter(c -> c.getMembers().size() > 0)
-                .filter(c -> c.getMembers().get(0).getId().equals(senderUuid))
+                .filter(c -> c.getMembers().get(0).getId().equals(receiverUuid))
                 .findFirst().get();
-        ChatMessage chatMessage = new ChatMessage(content, dest.getMembers().get(0), LocalDateTime.now());
+        User sender = findUserByUuid(senderUuid, users).get();
+        ChatMessage chatMessage = new ChatMessage(content, sender, LocalDateTime.now());
         Platform.runLater(() -> dest.getMessages().add(chatMessage));
-        storeMessage(senderUuid, senderUuid, content, timestamp);
+        storeMessage(receiverUuid, senderUuid, content, timestamp);
     }
 
     private void storeMessage(String userUuid, String senderUuid, String content, long timestamp) {
@@ -303,7 +310,12 @@ public class WaveService implements Service, ProvisioningClient, MessagingClient
         return answer;
     }
 
-    Optional<User> findUserByContact(Contact contact, List<User> users) {
+    private Optional<User> findUserByUuid(String uuid, List<User> users) {
+        Optional<User> target = users.stream().filter(u -> u.getId().equals(uuid)).findFirst();
+        return target;
+    }
+
+    private Optional<User> findUserByContact(Contact contact, List<User> users) {
         String cuuid = contact.getUuid();
         Optional<User> target = users.stream().filter(u -> u.getId().equals(cuuid)).findFirst();
         return target;
@@ -311,7 +323,7 @@ public class WaveService implements Service, ProvisioningClient, MessagingClient
 
     // this will never give a match since we use a random id when creating a channel.
     // There is no 1-1 relation between User and Channel in case a channel has many users.
-    Optional<Channel> findChannelByUser(User user, List<Channel> channels) {
+    private Optional<Channel> findChannelByUser(User user, List<Channel> channels) {
         String cuuid = user.getId();
         Optional<Channel> target = channels.stream().filter(u -> u.getId().equals(cuuid)).findFirst();
         return target;
