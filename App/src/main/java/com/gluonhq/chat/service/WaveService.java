@@ -92,20 +92,17 @@ public class WaveService implements Service, ProvisioningClient, MessagingClient
         answer.addAll(contacts.stream()
                 .map(a -> createUserFromContact(a))
                 .collect(Collectors.toList()));
-        contacts.addListener(new ListChangeListener<Contact>() {
-            @Override
-            public void onChanged(ListChangeListener.Change<? extends Contact> change) {
-                while (change.next()) {
-                    List<User> addedUsers = change.getAddedSubList().stream()
-                            .map(contact -> createUserFromContact(contact))
-                            .collect(Collectors.toList());
-                    answer.addAll(addedUsers);
-                    List<User> removedUsers = change.getRemoved().stream()
-                            .map(contact -> findUserByContact(contact, answer))
-                            .filter(opt -> opt.isPresent())
-                            .map(opt -> opt.get()).collect(Collectors.toList());
-                    answer.removeAll(removedUsers);
-                }
+        contacts.addListener((ListChangeListener.Change<? extends Contact> change) -> {
+            while (change.next()) {
+                List<User> addedUsers = change.getAddedSubList().stream()
+                        .map(contact -> createUserFromContact(contact))
+                        .collect(Collectors.toList());
+                Platform.runLater(()-> answer.addAll(addedUsers));
+                List<User> removedUsers = change.getRemoved().stream()
+                        .map(contact -> findUserByContact(contact, answer))
+                        .filter(opt -> opt.isPresent())
+                        .map(opt -> opt.get()).collect(Collectors.toList());
+                Platform.runLater(() -> answer.removeAll(removedUsers));
             }
         });
         return answer;
@@ -125,15 +122,12 @@ public class WaveService implements Service, ProvisioningClient, MessagingClient
         answer.addAll(users.stream().map(user -> createChannelFromUser(user))
                 .collect(Collectors.toList()));
         answer.forEach(c -> readMessageForChannel(c));
-        users.addListener(new ListChangeListener<User>() {
-            @Override
-            public void onChanged(ListChangeListener.Change<? extends User> change) {
-                while (change.next()) {
-                    List<Channel> addedChannels = change.getAddedSubList().stream()
-                            .map(user -> createChannelFromUser(user))
-                            .collect(Collectors.toList());
-                    answer.addAll(addedChannels);
-                }
+        users.addListener((ListChangeListener.Change<? extends User> change) -> {
+            while (change.next()) {
+                List<Channel> addedChannels = change.getAddedSubList().stream()
+                        .map(user -> createChannelFromUser(user))
+                        .collect(Collectors.toList());
+                answer.addAll(addedChannels);
             }
         });
         return answer;
