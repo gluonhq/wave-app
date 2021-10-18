@@ -4,17 +4,20 @@ import com.gluonhq.attach.display.DisplayService;
 import com.gluonhq.attach.keyboard.KeyboardService;
 import com.gluonhq.attach.util.Platform;
 import com.gluonhq.charm.glisten.afterburner.GluonPresenter;
+import com.gluonhq.charm.glisten.control.Avatar;
 import com.gluonhq.charm.glisten.mvc.View;
 import com.gluonhq.chat.GluonChat;
 import com.gluonhq.chat.chatlistview.ChatListView;
 import com.gluonhq.chat.model.Channel;
 import com.gluonhq.chat.model.ChatMessage;
 import com.gluonhq.chat.service.Service;
+import com.gluonhq.chat.util.ImageCache;
 import com.gluonhq.chat.views.helper.PlusPopupView;
 import com.gluonhq.emoji.control.EmojiTextArea;
 import javafx.animation.PauseTransition;
 import javafx.beans.InvalidationListener;
 import javafx.beans.Observable;
+import javafx.beans.binding.Bindings;
 import javafx.collections.ObservableList;
 import javafx.collections.transformation.SortedList;
 import javafx.fxml.FXML;
@@ -24,6 +27,7 @@ import javafx.scene.layout.BorderPane;
 import javafx.scene.layout.HBox;
 import javafx.scene.layout.Priority;
 import javafx.scene.layout.StackPane;
+import javafx.scene.layout.VBox;
 import javafx.util.Duration;
 
 import javax.inject.Inject;
@@ -38,6 +42,12 @@ import java.util.ResourceBundle;
 public class ChatPresenter extends GluonPresenter<GluonChat> {
 
     @FXML private View chatView;
+
+    @FXML private HBox channelBox;
+    @FXML private VBox channelIcon;
+    @FXML private Label channelName;
+    @FXML private Button closeChannel;
+
     @FXML private StackPane stackPane;
     @FXML private HBox unreadBox;
     @FXML private Label unread;
@@ -53,8 +63,17 @@ public class ChatPresenter extends GluonPresenter<GluonChat> {
     private PauseTransition pause;
 
     public void initialize() {
+        closeChannel.setOnAction(e -> updateMessages(null));
+        channelBox.visibleProperty().bind(channelName.textProperty().isNotEmpty());
         chatList = new ChatListView<>();
-        chatList.setPlaceholder(new Label(resources.getString("select.channel")));
+        Label placeholder = new Label();
+        placeholder.textProperty().bind(Bindings.createStringBinding(() -> {
+            if (channelName.getText() == null || channelName.getText().isEmpty()) {
+                return resources.getString("select.channel");
+            }
+            return resources.getString("empty.channel");
+        }, channelName.textProperty()));
+        chatList.setPlaceholder(placeholder);
         chatList.getStyleClass().add("chat-list");
         chatList.setCellFactory(listView -> new MessageCell());
 
@@ -121,7 +140,25 @@ public class ChatPresenter extends GluonPresenter<GluonChat> {
     }
 
     void updateMessages(Channel channel) {
-        createSortList(channel.getMessages());
+        if (channel != null) {
+            createSortList(channel.getMessages());
+            channelName.setText(channel.displayName());
+            ImageCache.getImage(channel.getMembers().isEmpty() ? null : channel.getMembers().get(0).getAvatarPath())
+                    .ifPresentOrElse(im -> {
+                        Avatar avatar = new Avatar(0, im);
+                        avatar.setMouseTransparent(true);
+                        channelIcon.getChildren().setAll(avatar);
+                    }, () -> {
+                        String initials = Service.getInitials(channel.displayName());
+                        Label icon = new Label(initials.substring(0, Math.min(initials.length(), 2)));
+                        icon.getStyleClass().add("chat-channel-icon");
+                        channelIcon.getChildren().setAll(icon);
+                    });
+        } else {
+            chatList.setItems(null);
+            channelIcon.getChildren().clear();
+            channelName.setText(null);
+        }
         bottomPane.setDisable(false);
     }
 
