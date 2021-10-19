@@ -137,6 +137,16 @@ public class ChatPresenter {
 
     void updateMessages(Channel channel) {
         if (channel != null) {
+            channel.typing().addListener(new InvalidationListener() {
+                @Override
+                public void invalidated(Observable o) {
+                    if (channel.typing().get()) {
+                        channelName.setText(channel.displayName()+"...");
+                    } else {
+                        channelName.setText(channel.displayName());
+                    }
+                }
+            });
             createSortList(channel.getMessages());
             channelName.setText(channel.displayName());
             ImageCache.getImage(channel.getMembers().isEmpty() ? null : channel.getMembers().get(0).getAvatarPath())

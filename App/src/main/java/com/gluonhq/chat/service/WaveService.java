@@ -168,6 +168,8 @@ public class WaveService implements Service, ProvisioningClient, MessagingClient
         return loggedUser;
     }
 
+    // MESSAGECLIENT
+    
     @Override
     public void gotMessage(String senderUuid, String content, long timestamp) {
         gotMessage(senderUuid, content, timestamp, senderUuid);
@@ -187,6 +189,23 @@ public class WaveService implements Service, ProvisioningClient, MessagingClient
         storeMessage(receiverUuid, senderUuid, content, timestamp);
     }
 
+    @Override
+    public void gotTypingAction(String senderUuid, boolean startTyping, boolean stopTyping) {
+        System.err.println("TypingAction for "+senderUuid);
+        Channel dest = this.channels.stream()
+                .filter(c -> c.getMembers().size() > 0)
+                .filter(c -> c.getMembers().get(0).getId().equals(senderUuid))
+                .findFirst().get();
+        Platform.runLater(() -> {
+            if (startTyping) {
+                dest.typing().set(true);
+            }
+            if (stopTyping) {
+                dest.typing().set(false);
+            }
+        });
+    }
+    
     private void storeMessage(String userUuid, String senderUuid, String content, long timestamp) {
         try {
             File contactsDir = wave.SIGNAL_FX_CONTACTS_DIR;
