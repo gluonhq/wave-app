@@ -35,7 +35,7 @@ import java.util.ResourceBundle;
 
 // TODO Show user images when available
 
-public class ChatPresenter extends GluonPresenter<GluonChat> {
+public class ChatPresenter {
 
     @FXML private View chatView;
 
