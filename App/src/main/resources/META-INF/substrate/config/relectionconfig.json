@@ -1039,6 +1039,10 @@
     "methods":[{"name":"newBuilder","parameterTypes":[] }]
   },
   {
+    "name":"org.whispersystems.signalservice.internal.push.StaleDevices",
+    "methods":[{"name":"<init>","parameterTypes":[] }]
+  },
+  {
     "name":"org.whispersystems.signalservice.internal.util.JsonUtil$IdentityKeyDeserializer",
     "methods":[{"name":"<init>","parameterTypes":[] }]
   },
