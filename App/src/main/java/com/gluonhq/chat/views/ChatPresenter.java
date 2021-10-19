@@ -35,7 +35,7 @@ import java.util.ResourceBundle;
 
 // TODO Show user images when available
 
-public class ChatPresenter {
+public class ChatPresenter extends GluonPresenter<GluonChat> {
 
     @FXML private View chatView;
 
@@ -175,7 +175,7 @@ public class ChatPresenter {
     private void sendMessage(EmojiTextArea messageEditor) {
         String text = messageEditor.getText().trim();
         if (!text.isEmpty()) {
-            var message = new ChatMessage(text, service.loggedUser(), LocalDateTime.now(), true);
+            var message = new ChatMessage(text, service.loggedUser(), System.currentTimeMillis(), true);
             messages.add(message);
             messageEditor.clear();
             messageEditor.requestFocus();

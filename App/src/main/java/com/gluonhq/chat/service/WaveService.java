@@ -35,6 +35,7 @@ import javafx.beans.Observable;
 import javafx.collections.FXCollections;
 import javafx.collections.ListChangeListener;
 import javafx.collections.ObservableList;
+import javafx.collections.transformation.FilteredList;
 import javafx.scene.image.Image;
 
 public class WaveService implements Service, ProvisioningClient, MessagingClient {
@@ -155,7 +156,7 @@ public class WaveService implements Service, ProvisioningClient, MessagingClient
                 Instant instant = Instant.ofEpochMilli(timestamp);
                 LocalDateTime ldt = LocalDateTime.ofInstant(instant, ZoneId.systemDefault());
                 User author = this.loggedUser.getId().equals(senderuuid) ? this.loggedUser : user;
-                ChatMessage cm = new ChatMessage(content, author, ldt);
+                ChatMessage cm = new ChatMessage(content, author, timestamp);
                 c.getMessages().add(cm);
             }
         } catch (IOException ex) {
@@ -179,23 +180,16 @@ public class WaveService implements Service, ProvisioningClient, MessagingClient
     public void gotMessage(String senderUuid, String content, long timestamp, String receiverUuid) {
         wave.getWaveLogger().log(Level.DEBUG,
                 "GOT MESSAGE from " + senderUuid + " for "+ receiverUuid+" with content " + content);
-        Channel dest = this.channels.stream()
-                .filter(c -> c.getMembers().size() > 0)
-                .filter(c -> c.getMembers().get(0).getId().equals(receiverUuid))
-                .findFirst().get();
+        Channel dest = getChannelByUuid(senderUuid);
         User sender = findUserByUuid(senderUuid, users).get();
-        ChatMessage chatMessage = new ChatMessage(content, sender, LocalDateTime.now());
+        ChatMessage chatMessage = new ChatMessage(content, sender, timestamp);
         Platform.runLater(() -> dest.getMessages().add(chatMessage));
         storeMessage(receiverUuid, senderUuid, content, timestamp);
     }
 
     @Override
     public void gotTypingAction(String senderUuid, boolean startTyping, boolean stopTyping) {
-        System.err.println("TypingAction for "+senderUuid);
-        Channel dest = this.channels.stream()
-                .filter(c -> c.getMembers().size() > 0)
-                .filter(c -> c.getMembers().get(0).getId().equals(senderUuid))
-                .findFirst().get();
+        Channel dest = getChannelByUuid(senderUuid);
         Platform.runLater(() -> {
             if (startTyping) {
                 dest.typing().set(true);
@@ -205,7 +199,32 @@ public class WaveService implements Service, ProvisioningClient, MessagingClient
             }
         });
     }
-    
+
+    @Override
+    public void gotReceiptMessage(String senderUuid, int type, List<Long> timestamps) {
+        Channel dest = getChannelByUuid(senderUuid);
+        Platform.runLater(() -> {
+            FilteredList<ChatMessage> filtered = dest.getMessages()
+                    .filtered(m -> timestamps.contains(m.getTimestamp()));
+            ChatMessage.ReceiptType rtype = ChatMessage.ReceiptType.UNKNOWN;
+            switch (type) {
+                case 1:
+                    rtype = ChatMessage.ReceiptType.DELIVERY;
+                    break;
+                case 2:
+                    rtype = ChatMessage.ReceiptType.VIEWED;
+                    break;
+                case 3:
+                    rtype = ChatMessage.ReceiptType.READ;
+                    break;
+            }
+
+            for (ChatMessage msg : filtered) {
+                msg.setReceiptType(rtype);
+            }
+        });
+    }
+
     private void storeMessage(String userUuid, String senderUuid, String content, long timestamp) {
         try {
             File contactsDir = wave.SIGNAL_FX_CONTACTS_DIR;
@@ -240,11 +259,12 @@ public class WaveService implements Service, ProvisioningClient, MessagingClient
             public void onChanged(ListChangeListener.Change<? extends ChatMessage> change) {
                 while (change.next()) {
                     List<? extends ChatMessage> addedmsg = change.getAddedSubList();
-                    addedmsg.stream().filter(m -> m.getLocalOriginated())
-                            .forEach(m -> {
+                    addedmsg.stream().filter((ChatMessage m) -> m.getLocalOriginated())
+                            .forEach((ChatMessage m) -> {
                                 String uuid = u.getId();
                                 try {
-                                    wave.sendMessage(uuid, m.getMessage());
+                                    long time = wave.sendMessage(uuid, m.getMessage());
+                                    m.setTimestamp(time);
                                 } catch (IOException ex) {
                                     ex.printStackTrace();
                                 }
@@ -281,7 +301,22 @@ public class WaveService implements Service, ProvisioningClient, MessagingClient
             ex.printStackTrace();
         }
     }
-
+    
+    /**
+     * Return the channel that contains the given senderUuid as its first member.
+     * In case of a direct channel, there is only 1 member, so this returns the
+     * direct channel belonging to the specified senderUuid.
+     * @param senderUuid
+     * @return 
+     */
+    private Channel getChannelByUuid(String senderUuid) {
+        Channel dest = this.channels.stream()
+                .filter(c -> c.getMembers().size() > 0)
+                .filter(c -> c.getMembers().get(0).getId().equals(senderUuid))
+                .findFirst().get();
+        return dest;
+    }
+    
     private static User createUserFromContact(Contact c) {
         String firstName = c.getName();
         if ((c.getName() == null) || (c.getName().isEmpty())) {
