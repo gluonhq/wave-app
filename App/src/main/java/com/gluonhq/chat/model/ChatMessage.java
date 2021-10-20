@@ -14,7 +14,7 @@ public class ChatMessage extends Searchable {
 
     public enum ReceiptType {
         UNKNOWN (0),
-        DELIVERED (1),
+        DELIVERY (1),
         READ (2),
         VIEWED (3);
 
