@@ -58,6 +58,7 @@ public class WaveService implements Service, ProvisioningClient, MessagingClient
             this.wave.setMessageListener(this);
             try {
                 this.wave.ensureConnected();
+                wave.syncContacts();
             } catch (IOException ex) {
                 ex.printStackTrace();
                 System.err.println("We're offline. Not much we can do now!");
@@ -296,7 +297,6 @@ public class WaveService implements Service, ProvisioningClient, MessagingClient
             wave.getWaveLogger().log(Level.DEBUG, "[WAVESERVICE] synccontacts");
             wave.syncContacts();
             Platform.runLater(() -> bootstrapClient.bootstrapSucceeded());
-
         } catch (Exception ex) {
             ex.printStackTrace();
         }
