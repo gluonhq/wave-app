@@ -40,7 +40,7 @@ public class ChannelPresenter {
         }));
         channelList.setItems(channelFilteredList);
         channelList.setCellFactory(param -> new ChannelCell());
-        channelList.setHeadersFunction(param -> param.isDirect() ? "DIRECT" : "COMMON");
+        channelList.setHeadersFunction(param -> param.isDirect() ? "DIRECT" : "GROUP");
         channelList.setHeaderCellFactory(p -> new CharmListCell<>() {
 
             private final HBox box;
