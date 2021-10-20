@@ -71,3 +71,20 @@ mvn -Pios client:build -pl App
 ```
 mvn -Pios client:run -pl App
 ```
+
+## FAQs
+
+Below is a list of frequently asked questions / issues one might face during running ChatApp from source:
+
+### No Device Found
+
+This error comes when the app is started, but we waited too long to scan the QR code
+
+### Network Error
+
+This error normally occurs due to "Rate Limit Exceeded", which means that scanning was tried too often.
+We need to allow it to cool down and try again after 1 or 2 minutes.
+
+### Scanning done but no contact list shown
+
+Current workaround is to remove all your linked devices from mobile app, remove `~/.signalfx` directory and re-scan.
