@@ -29,7 +29,6 @@ import javafx.scene.layout.VBox;
 import javafx.util.Duration;
 
 import javax.inject.Inject;
-import java.time.LocalDateTime;
 import java.util.Comparator;
 import java.util.ResourceBundle;
 
@@ -137,18 +136,10 @@ public class ChatPresenter {
 
     void updateMessages(Channel channel) {
         if (channel != null) {
-            channel.typing().addListener(new InvalidationListener() {
-                @Override
-                public void invalidated(Observable o) {
-                    if (channel.typing().get()) {
-                        channelName.setText(channel.displayName()+"...");
-                    } else {
-                        channelName.setText(channel.displayName());
-                    }
-                }
-            });
             createSortList(channel.getMessages());
-            channelName.setText(channel.displayName());
+            channelName.textProperty().bind(Bindings.createStringBinding(
+                    () -> channel.displayName() + (channel.isTyping() ? " ..." : ""),
+                    channel.typingProperty()));
             ImageCache.getImage(channel.getMembers().isEmpty() ? null : channel.getMembers().get(0).getAvatarPath())
                     .ifPresentOrElse(im -> {
                         Avatar avatar = new Avatar(0, im);
@@ -164,6 +155,7 @@ public class ChatPresenter {
         } else {
             chatList.setItems(null);
             channelIcon.getChildren().clear();
+            channelName.textProperty().unbind();
             channelName.setText(null);
             bottomPane.setDisable(true);
         }
@@ -187,6 +179,7 @@ public class ChatPresenter {
         SortedList<ChatMessage> sortedList = new SortedList<>(messages);
         sortedList.setComparator(Comparator.comparing(ChatMessage::getTime));
         chatList.setItems(sortedList);
+        chatList.scrollTo(sortedList.size() - 1);
     }
 
     private void updateUnreadLabel() {
