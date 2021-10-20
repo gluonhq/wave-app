@@ -57,7 +57,7 @@ public class ChannelPresenter {
                 if (item == null || empty) {
                     setGraphic(null);
                 } else {
-                    label.setText(resources.getString(item.isDirect() ? "channels.category.direct" : "channels.category.common"));
+                    label.setText(resources.getString(item.isDirect() ? "channels.category.direct" : "channels.category.group"));
                     setGraphic(box);
                 }
             }
