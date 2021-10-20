@@ -16,9 +16,6 @@ LAUNCHER_CLASS=com.gluonhq.chat.AppLauncher
 MAIN_CLASS=com/gluonhq/chat/GluonChat
 ICON_PATH=App/src/main/resources/ChatAppLogo.png
 
-# Set desired installer type: "app-image", "rpm" or "deb".
-INSTALLER_TYPE=deb
-
 echo "java home: $JAVA_HOME"
 echo "project version: $PROJECT_VERSION"
 echo "app version: $APP_VERSION"
@@ -90,7 +87,6 @@ $JAVA_HOME/bin/jlink \
 echo "Creating installer of type $INSTALLER_TYPE"
 
 $JAVA_HOME/bin/jpackage \
---type $INSTALLER_TYPE \
 --dest App/target/installer \
 --input App/target/installer/input/libs \
 --name ${APP_NAME} \
@@ -101,4 +97,5 @@ $JAVA_HOME/bin/jpackage \
 --icon ${ICON_PATH} \
 --app-version ${APP_VERSION} \
 --vendor "Gluon" \
---copyright "Copyright © 2021 Gluon"
+--copyright "Copyright © 2021 Gluon" \
+"$@"
