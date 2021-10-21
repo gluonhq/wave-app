@@ -28,10 +28,8 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.Random;
 import java.util.stream.Collectors;
-import java.util.stream.Stream;
+
 import javafx.application.Platform;
-import javafx.beans.InvalidationListener;
-import javafx.beans.Observable;
 import javafx.collections.FXCollections;
 import javafx.collections.ListChangeListener;
 import javafx.collections.ObservableList;
@@ -42,7 +40,7 @@ public class WaveService implements Service, ProvisioningClient, MessagingClient
 
     private User loggedUser;
     private final WaveManager wave;
-    Map<Channel, ObservableList<ChatMessage>> channelMap = new HashMap<>();
+    private final Map<Channel, ObservableList<ChatMessage>> channelMap = new HashMap<>();
     boolean channelsClean = false;
     private ObservableList<Contact> contacts;
     private BootstrapClient bootstrapClient;
@@ -58,6 +56,7 @@ public class WaveService implements Service, ProvisioningClient, MessagingClient
             this.wave.setMessageListener(this);
             try {
                 this.wave.ensureConnected();
+                wave.syncContacts();
             } catch (IOException ex) {
                 ex.printStackTrace();
                 System.err.println("We're offline. Not much we can do now!");
@@ -126,12 +125,23 @@ public class WaveService implements Service, ProvisioningClient, MessagingClient
         answer.addAll(users.stream().map(user -> createChannelFromUser(user))
                 .collect(Collectors.toList()));
         answer.forEach(c -> readMessageForChannel(c));
+        answer.addListener((ListChangeListener.Change<? extends Channel> change) -> {
+            while (change.next()) {
+                change.getAddedSubList().forEach(channel -> readMessageForChannel(channel));
+            }
+        });
+
         users.addListener((ListChangeListener.Change<? extends User> change) -> {
             while (change.next()) {
                 List<Channel> addedChannels = change.getAddedSubList().stream()
                         .map(user -> createChannelFromUser(user))
                         .collect(Collectors.toList());
-                answer.addAll(addedChannels);
+                Platform.runLater(() -> answer.addAll(addedChannels));
+                List<Channel> removedChannels = change.getRemoved().stream()
+                        .map(user -> findChannelByUser(user, answer))
+                        .filter(opt -> opt.isPresent())
+                        .map(opt -> opt.get()).collect(Collectors.toList());
+                Platform.runLater(() -> answer.removeAll(removedChannels));
             }
         });
         return answer;
@@ -181,6 +191,11 @@ public class WaveService implements Service, ProvisioningClient, MessagingClient
         wave.getWaveLogger().log(Level.DEBUG,
                 "GOT MESSAGE from " + senderUuid + " for "+ receiverUuid+" with content " + content);
         Channel dest = getChannelByUuid(senderUuid);
+        if (dest == null) {
+            wave.getWaveLogger().log(Level.WARNING, "unknown sender for incoming message: "
+                    +senderUuid+"\nIgnoring message.");
+            return;
+        }
         User sender = findUserByUuid(senderUuid, users).get();
         ChatMessage chatMessage = new ChatMessage(content, sender, timestamp);
         Platform.runLater(() -> dest.getMessages().add(chatMessage));
@@ -192,10 +207,10 @@ public class WaveService implements Service, ProvisioningClient, MessagingClient
         Channel dest = getChannelByUuid(senderUuid);
         Platform.runLater(() -> {
             if (startTyping) {
-                dest.typing().set(true);
+                dest.setTyping(true);
             }
             if (stopTyping) {
-                dest.typing().set(false);
+                dest.setTyping(false);
             }
         });
     }
@@ -204,24 +219,10 @@ public class WaveService implements Service, ProvisioningClient, MessagingClient
     public void gotReceiptMessage(String senderUuid, int type, List<Long> timestamps) {
         Channel dest = getChannelByUuid(senderUuid);
         Platform.runLater(() -> {
-            FilteredList<ChatMessage> filtered = dest.getMessages()
-                    .filtered(m -> timestamps.contains(m.getTimestamp()));
-            ChatMessage.ReceiptType rtype = ChatMessage.ReceiptType.UNKNOWN;
-            switch (type) {
-                case 1:
-                    rtype = ChatMessage.ReceiptType.DELIVERY;
-                    break;
-                case 2:
-                    rtype = ChatMessage.ReceiptType.VIEWED;
-                    break;
-                case 3:
-                    rtype = ChatMessage.ReceiptType.READ;
-                    break;
-            }
-
-            for (ChatMessage msg : filtered) {
-                msg.setReceiptType(rtype);
-            }
+            ChatMessage.ReceiptType rtype = ChatMessage.ReceiptType.valueOf(type);
+            dest.getMessages()
+                    .filtered(m -> timestamps.contains(m.getTimestamp()))
+                    .forEach(msg -> msg.setReceiptType(rtype));
         });
     }
 
@@ -296,7 +297,6 @@ public class WaveService implements Service, ProvisioningClient, MessagingClient
             wave.getWaveLogger().log(Level.DEBUG, "[WAVESERVICE] synccontacts");
             wave.syncContacts();
             Platform.runLater(() -> bootstrapClient.bootstrapSucceeded());
-
         } catch (Exception ex) {
             ex.printStackTrace();
         }
@@ -307,13 +307,13 @@ public class WaveService implements Service, ProvisioningClient, MessagingClient
      * In case of a direct channel, there is only 1 member, so this returns the
      * direct channel belonging to the specified senderUuid.
      * @param senderUuid
-     * @return 
+     * @return the Channel corresponding to this user, or null if no such channel  exists.
      */
     private Channel getChannelByUuid(String senderUuid) {
         Channel dest = this.channels.stream()
                 .filter(c -> c.getMembers().size() > 0)
                 .filter(c -> c.getMembers().get(0).getId().equals(senderUuid))
-                .findFirst().get();
+                .findFirst().orElse(null);
         return dest;
     }
     
@@ -341,11 +341,11 @@ public class WaveService implements Service, ProvisioningClient, MessagingClient
         return target;
     }
 
-    // this will never give a match since we use a random id when creating a channel.
-    // There is no 1-1 relation between User and Channel in case a channel has many users.
+    // A direct channel has an id "c" + userId. This is brittle though, and should be
+    // made more robust once we introduce group channels
     private Optional<Channel> findChannelByUser(User user, List<Channel> channels) {
-        String cuuid = user.getId();
-        Optional<Channel> target = channels.stream().filter(u -> u.getId().equals(cuuid)).findFirst();
+        String cuuid = "c" + user.getId();
+        Optional<Channel> target = channels.stream().filter(c -> c.getId().equals(cuuid)).findFirst();
         return target;
     }
 
