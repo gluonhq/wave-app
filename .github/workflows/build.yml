@@ -231,6 +231,7 @@ jobs:
 
 
   windows-native:
+    if: ${{ false }}
     runs-on: windows-latest
     steps:
       - uses: actions/checkout@v2
@@ -255,16 +256,13 @@ jobs:
           gluon-license: ${{ secrets.GLUON_LICENSE }}
           dir: App
 
-      - name: Gluon Build (disabled)
-        if: ${{ false }}
+      - name: Gluon Build
         run: mvn install && mvn -Pdesktop gluonfx:build gluonfx:package -f App
 
-      - name: Copy native image to staging (disabled)
-        if: ${{ false }}
+      - name: Copy native image to staging
         run: cp -r App/target/gluonfx/x86_64-windows/ChatApp.exe staging
 
-      - name: Upload (disabled)
-        if: ${{ false }}
+      - name: Upload
         uses: actions/upload-artifact@v2
         with:
           name: NativePackageWindows
