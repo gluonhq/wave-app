@@ -127,14 +127,12 @@ public class WaveService implements Service, ProvisioningClient, MessagingClient
         answer.addAll(users.stream().map(user -> createChannelFromUser(user))
                 .collect(Collectors.toList()));
         answer.forEach(c -> readMessageForChannel(c));
-        answer.addListener(new ListChangeListener<>() {
-            @Override
-            public void onChanged(ListChangeListener.Change<? extends Channel> change) {
-                while (change.next()) {
-                    change.getAddedSubList().forEach(channel -> readMessageForChannel(channel));
-                }
+        answer.addListener((ListChangeListener.Change<? extends Channel> change) -> {
+            while (change.next()) {
+                change.getAddedSubList().forEach(channel -> readMessageForChannel(channel));
             }
         });
+
         users.addListener((ListChangeListener.Change<? extends User> change) -> {
             while (change.next()) {
                 List<Channel> addedChannels = change.getAddedSubList().stream()
