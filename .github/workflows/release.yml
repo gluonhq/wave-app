@@ -162,7 +162,7 @@ jobs:
         with:
           upload_url: ${{needs.create-release.outputs.upload_url}}
           asset_path: App/target/gluonfx/x86_64-linux/ChatApp
-          asset_name: ChatAppLinuxNative-${{needs.create-release.outputs.app_version}}
+          asset_name: ChatApp-linux-native-${{needs.create-release.outputs.app_version}}
           asset_content_type: application/zip                    
           
 
@@ -234,7 +234,7 @@ jobs:
         with:
           upload_url: ${{needs.create-release.outputs.upload_url}}
           asset_path: ${{ steps.outputfile.outputs.path }}
-          asset_name: ChatApp-${{needs.create-release.outputs.app_version}}.pkg
+          asset_name: ChatApp-macos-${{needs.create-release.outputs.app_version}}.pkg
           asset_content_type: application/zip             
 
 
@@ -281,7 +281,7 @@ jobs:
         with:
           upload_url: ${{needs.create-release.outputs.upload_url}}
           asset_path: App/target/gluonfx/x86_64-darwin/ChatApp
-          asset_name: ChatAppMacNative-${{needs.create-release.outputs.app_version}}
+          asset_name: ChatApp-macos-native-${{needs.create-release.outputs.app_version}}
           asset_content_type: application/zip               
 
 
@@ -347,7 +347,7 @@ jobs:
         with:
           upload_url: ${{needs.create-release.outputs.upload_url}}
           asset_path: ${{ steps.outputfile.outputs.path }}
-          asset_name: ChatApp-${{needs.create-release.outputs.app_version}}.msi
+          asset_name: ChatApp-windows-${{needs.create-release.outputs.app_version}}.msi
           asset_content_type: application/zip                
 
 
