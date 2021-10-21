@@ -71,7 +71,6 @@ public interface Service {
     static String getInitials(String name) {
         if (name != null) {
             return Arrays.stream(name.split(" "))
-                    .map(Service::stripBidiProtection)
                     .map(String::trim)
                     .filter(s -> s.length() > 0)
                     .map(s -> s.substring(0, 1))
@@ -81,11 +80,4 @@ public interface Service {
             return "";
         }
     }
-
-    private static String stripBidiProtection(String text) {
-        if (text == null) return null;
-
-        return text.replaceAll("[\\u2068\\u2069\\u202c]", "");
-    }
-
 }
