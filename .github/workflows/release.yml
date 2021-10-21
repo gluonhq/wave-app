@@ -99,7 +99,7 @@ jobs:
         with:
           upload_url: ${{needs.create-release.outputs.upload_url}}
           asset_path: ${{ steps.outputfile.outputs.pathDeb }}
-          asset_name: ChatApp-${{needs.create-release.outputs.app_version}}.deb
+          asset_name: ChatApp-linux-${{needs.create-release.outputs.app_version}}.deb
           asset_content_type: application/zip       
 
       - name: Upload Release Asset (rpm)
@@ -110,7 +110,7 @@ jobs:
         with:
           upload_url: ${{needs.create-release.outputs.upload_url}}
           asset_path: ${{ steps.outputfile.outputs.pathRpm }}
-          asset_name: ChatApp-${{needs.create-release.outputs.app_version}}.rpm
+          asset_name: ChatApp-linux-${{needs.create-release.outputs.app_version}}.rpm
           asset_content_type: application/zip                    
 
 
