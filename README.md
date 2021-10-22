@@ -19,23 +19,19 @@ cd App && mvn gluonfx:run
 Instructions for Native Image
 ------------
 
-* Download the following version of GraalVM and unpack it like you would any other JDK. (e.g. in `/opt`):
-
-  * [GraalVM for Linux](https://download2.gluonhq.com/substrate/graalvm/graalvm-svm-linux-20.1.0-ea+25.zip)
-  * [GraalVM for Mac](https://download2.gluonhq.com/substrate/graalvm/graalvm-svm-darwin-20.1.0-ea+25.zip)
-
-* Configure the runtime environment. Set `GRAALVM_HOME` environment variable to the GraalVM installation directory:
+* Download the following version of GraalVM and unpack it like you would any other JDK.
+* Set `GRAALVM_HOME` environment variable to the GraalVM installation directory:
 ```
 export GRAALVM_HOME=path-to-graalvm-directory
 ```
 
 * Native build the application:
 ```
-mvn client:build -pl App
+mvn gluonfx:build -pl App
 ```
 * Once the build is successful, the native image be executed by:
 ```
-mvn client:run -pl App
+mvn gluonfx:run -pl App
 ```
 
 ## FAQs
