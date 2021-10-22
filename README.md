@@ -31,7 +31,7 @@ mvn gluonfx:build -pl App
 ```
 * Once the build is successful, the native image be executed by:
 ```
-mvn gluonfx:run -pl App
+mvn gluonfx:nativerun -pl App
 ```
 
 ## FAQs
