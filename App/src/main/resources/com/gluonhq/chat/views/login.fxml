@@ -9,7 +9,7 @@
 
 <View fx:id="loginView" styleClass="login-view" xmlns="http://javafx.com/javafx/17" xmlns:fx="http://javafx.com/fxml/1" fx:controller="com.gluonhq.chat.views.LoginPresenter">
     <VBox fx:id="box" styleClass="box">
-        <Label fx:id="header" styleClass="header" text="Link your phone to Signal Desktop" />
+        <Label fx:id="header" styleClass="header" text="Link your phone to Gluon Wave" />
         <ImageView fx:id="qrImageView">
             <Image url="@/qr.png" />
         </ImageView>
@@ -19,10 +19,10 @@
             <padding>
                <Insets bottom="10.0" left="10.0" right="10.0" top="10.0" />
             </padding></Icon>
-             <Label text="Signal Settings" GridPane.columnIndex="1" />
+             <Label text="Gluon Wave Settings" GridPane.columnIndex="1" />
              <Label text="Linked Devices" GridPane.columnIndex="1" GridPane.rowIndex="1" />
              <Label text="'+' Button" GridPane.columnIndex="1" GridPane.rowIndex="2" />
-             <Label text="Signal Settings" GridPane.columnIndex="3" />
+             <Label text="Gluon Wave Settings" GridPane.columnIndex="3" />
              <Label text="Linked Devices" GridPane.columnIndex="3" GridPane.rowIndex="1" />
              <Label text="Link New Device" GridPane.columnIndex="3" GridPane.rowIndex="2" />
         </GridPane>
