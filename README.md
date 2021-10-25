@@ -19,7 +19,8 @@ cd App && mvn gluonfx:run
 Instructions for Native Image
 ------------
 
-* Download the latest version of GraalVM and unpack it like you would any other JDK.
+* Download the latest version of [GraalVM from Gluon](https://github.com/gluonhq/graal/releases/latest) and unpack it like you would any other JDK.
+
 * Set `GRAALVM_HOME` environment variable to the GraalVM installation directory:
 ```
 export GRAALVM_HOME=path-to-graalvm-directory
