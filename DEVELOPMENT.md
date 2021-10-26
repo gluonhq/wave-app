@@ -49,7 +49,7 @@ The application in this repository uses the libraries described in the
 previous section, and creates a JavaFX user interface around them.
 
 Running the Wave App
---------------------
+====================
 
 You can run Gluon Wave in 3 ways:
 
@@ -57,10 +57,44 @@ You can run Gluon Wave in 3 ways:
 * Download and run the jpackaged installers for Windows, Mac or Linux
 * Build the code from this repository and run it.
 
-Instructions for these options are in the [README](https://github.com/gluonhq/wave-app/README.md).
-They don't require a JVM at runtime. The first option leverages
-[GraalVM native-image](https://graalvm.org), the second option leverages
+The first 2 options don't require a JVM at runtime. The first option leverages
 the Java packager that is part of the JDK distributions.
+The second option leverages [GraalVM native-image](https://graalvm.org)a
+
+Downloading and running with the Java packager-based build
+----------------------------------------------------------
+
+* Set `JAVA_HOME` to a JDK 11+
+* Install all sub-projects in local maven repository:
+```
+mvn clean install
+```
+* Execute the application:
+```
+cd App && mvn gluonfx:run
+```
+
+Downloading and running with the GraalVM Native Image-based build
+-----------------------------------------------------------------
+
+* Download the latest version of [GraalVM from Gluon](https://github.com/gluonhq/graal/releases/latest) and unpack it like you would any other JDK.
+
+* Set `GRAALVM_HOME` environment variable to the GraalVM installation directory:
+```
+export GRAALVM_HOME=path-to-graalvm-directory
+```
+
+* Native build the application:
+```
+mvn gluonfx:build -pl App
+```
+* Once the build is successful, the native image be executed by:
+```
+mvn gluonfx:nativerun -pl App
+```
+
+What to do now?
+===============
 
 Issues
 ------
@@ -75,3 +109,31 @@ Missing functionality
 * No support for stickers
 
 ... but that is just a matter of time.
+
+Known issues:
+-------------
+Below is a list of frequently asked questions / issues one might face during running ChatApp from source:
+
+### No Device Found (in the mobile app)
+
+This error comes when the app is started, but you waited too long to scan the QR code
+
+### Network Error (in the mobile app)
+
+This error normally occurs due to "Rate Limit Exceeded", which means that scanning was tried too often.
+You need to allow it to cool down and try again after 1 or 2 minutes.
+
+### Scanning done but no contact list shown
+
+If all goes well, after the QR code is scanned, you should see your contact list in a few
+seconds. Sometimes, the contact sync requests isn't received. 
+Current workaround is to close the application and start it again.
+If that doesn't work, remove all your linked devices from mobile app, remove `~/.signalfx` directory and restart the application.
+
+I want to contribute!
+=====================
+We're excited you're reading until here! We recommend that you fork this repository, and change
+whatever you want. You can work on a different theme, by modifying the CSS files. You can
+create a different layout, by modifying the FXML files. Or you can modify the flow and logic,
+by modifying the Java files.
+
