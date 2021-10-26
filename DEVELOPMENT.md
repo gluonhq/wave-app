@@ -7,7 +7,7 @@ Signal protocol with Java and JavaFX.
 About Signal
 ------------
 
-[Signal] (https:/signal.org) is an encryption tool enabling end-to-end
+[Signal](https:/signal.org) is an encryption tool enabling end-to-end
 encryption. Messages sent via the Signal Protocol are encrypted by the
 sender, and decrypted by the recipient, using a combination of clever
 techniques including [Extended Triple Diffie-Hellman](https://signal.org/docs/specifications/x3dh/)
