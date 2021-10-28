@@ -4,11 +4,11 @@ import com.gluonhq.chat.model.Channel;
 import com.gluonhq.chat.model.ChatImage;
 import com.gluonhq.chat.model.ChatMessage;
 import com.gluonhq.chat.model.User;
-import com.gluonhq.wave.WaveManager;
-import com.gluonhq.wave.message.MessagingClient;
-import com.gluonhq.wave.model.Contact;
-import com.gluonhq.wave.provision.ProvisioningClient;
-import com.gluonhq.wave.util.QRGenerator;
+import com.gluonhq.equation.WaveManager;
+import com.gluonhq.equation.message.MessagingClient;
+import com.gluonhq.equation.model.Contact;
+import com.gluonhq.equation.provision.ProvisioningClient;
+import com.gluonhq.equation.util.QRGenerator;
 import javafx.application.Platform;
 import javafx.collections.FXCollections;
 import javafx.collections.ListChangeListener;
@@ -49,8 +49,11 @@ public class WaveService implements Service, ProvisioningClient, MessagingClient
             login(wave.getMyUuid());
             this.wave.setMessageListener(this);
             try {
+                wave.getWaveLogger().log(Level.DEBUG, "ensure we are connected");
                 this.wave.ensureConnected();
+                wave.getWaveLogger().log(Level.DEBUG, "we are connected, let's sync");
                 wave.syncEverything();
+                wave.getWaveLogger().log(Level.DEBUG, "sync requests are sent");
             } catch (IOException ex) {
                 ex.printStackTrace();
                 System.err.println("We're offline. Not much we can do now!");
@@ -288,7 +291,7 @@ public class WaveService implements Service, ProvisioningClient, MessagingClient
         int rnd = new Random().nextInt(1000);
         try {
             wave.getWaveLogger().log(Level.DEBUG, "[WAVESERVICE] rnd = " + rnd + ", create account");
-            wave.createAccount(number, "Gluon-" + rnd);
+            wave.createAccount(number, "Gluon" + rnd);
             login(wave.getMyUuid());
 
             wave.setMessageListener(this);
