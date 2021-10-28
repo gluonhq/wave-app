@@ -18,6 +18,7 @@ import javafx.beans.property.ObjectProperty;
 import javafx.collections.ObservableList;
 
 import javax.annotation.PostConstruct;
+import java.util.List;
 import java.util.function.Consumer;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -99,6 +100,17 @@ public class CloudlinkService implements Service {
     public User loggedUser() {
         // TODO: implement
         return null;
+    }
+
+    @Override
+    public List<String> readUnreadList() {
+        // TODO: implement
+        return List.of();
+    }
+
+    @Override
+    public void updateUnreadList(String channelId, boolean add) {
+        // TODO: implement
     }
 
     public String getName() {
