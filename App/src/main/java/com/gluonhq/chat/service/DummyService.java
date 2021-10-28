@@ -12,7 +12,6 @@ import javafx.scene.image.Image;
 import java.time.LocalDateTime;
 import java.time.ZoneOffset;
 import java.util.Arrays;
-import java.util.List;
 import java.util.concurrent.ThreadLocalRandom;
 import java.util.stream.Collectors;
 
@@ -37,16 +36,6 @@ public class DummyService implements Service {
     public String addImage(String id, Image image) {
         // no-op
         return id;
-    }
-
-    @Override
-    public List<String> readUnreadList() {
-        return List.of();
-    }
-
-    @Override
-    public void updateUnreadList(String channelId, boolean add) {
-        // TODO
     }
 
     @Override
