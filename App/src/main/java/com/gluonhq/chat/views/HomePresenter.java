@@ -1,12 +1,17 @@
 package com.gluonhq.chat.views;
 
 //import com.gluonhq.attach.orientation.OrientationService;
+
+import com.gluonhq.charm.glisten.application.AppManager;
 import com.gluonhq.charm.glisten.application.ViewStackPolicy;
 import com.gluonhq.charm.glisten.control.ProgressIndicator;
 import com.gluonhq.charm.glisten.mvc.View;
+import com.gluonhq.chat.model.Channel;
 import com.gluonhq.chat.service.Service;
+import javafx.beans.InvalidationListener;
+import javafx.beans.Observable;
 import javafx.beans.value.ChangeListener;
-import javafx.concurrent.Task;
+import javafx.collections.ObservableList;
 import javafx.fxml.FXML;
 import javafx.geometry.Pos;
 import javafx.scene.control.Label;
@@ -23,26 +28,26 @@ public class HomePresenter {
     @Inject private Service service;
     
     private final ChangeListener<Number> widthListener = (o, ov, nv) -> changeOrientation(nv.doubleValue());
-    private final ChangeListener<Boolean> showingListener = (obs, ov, nv) -> {
-        if (nv) {
-            homeView.getScene().widthProperty().addListener(widthListener);
-        } else {
-            homeView.getScene().widthProperty().removeListener(widthListener);
-        }
-    };
 
     public void initialize() {
-
 //        OrientationService.create().ifPresent(o -> o.orientationProperty().addListener(obs -> setupView()));
-        setupView();
-        homeView.showingProperty().addListener(showingListener);
+
+        homeView.showingProperty().addListener((obs, ov, nv) -> {
+            if (nv) {
+                AppManager.getInstance().getAppBar().setVisible(false);
+                setupView();
+                homeView.getScene().widthProperty().addListener(widthListener);
+            } else {
+                homeView.getScene().widthProperty().removeListener(widthListener);
+            }
+        });
     }
 
     private void setupView() {
         if (service.loggedUser() == null) {
             AppViewManager.LOGIN_VIEW.switchView(ViewStackPolicy.SKIP);
         } else {
-            loadContacts();
+            showProgressIndicator();
         }
     }
 
@@ -56,26 +61,27 @@ public class HomePresenter {
         }
     }
 
-    private void loadContacts() {
-        Task<Void> channelsTask = new Task<>() {
-            @Override
-            protected Void call() {
-                // service.getChannels();
-                service.initializeService();
-                return null;
-            }
-        };
-        channelsTask.setOnSucceeded(e -> {
+    private void showProgressIndicator() {
+        final ObservableList<Channel> channels = service.getChannels();
+        if (channels.isEmpty()) {
+            final VBox vBox = new VBox(10, new ProgressIndicator(), new Label("Retrieving contacts.."));
+            vBox.setAlignment(Pos.CENTER);
+            homeView.setCenter(new StackPane(vBox));
+            channels.addListener(new InvalidationListener() {
+                @Override
+                public void invalidated(Observable o) {
+                    System.out.println("Called listener...");
+                    if (homeView.isShowing()) {
+                        changeOrientation(homeView.getScene().getWidth());
+                    }
+                    channels.removeListener(this);
+                }
+            });
+        } else {
             if (homeView.isShowing()) {
-                final double width = homeView.getScene().getWidth();
-                changeOrientation(width);
+                changeOrientation(homeView.getScene().getWidth());
             }
-        });
-        Thread th = new Thread(channelsTask);
-        th.setDaemon(true);
-        th.start();
-        final VBox vBox = new VBox(10, new ProgressIndicator(), new Label("Retrieving contacts.."));
-        vBox.setAlignment(Pos.CENTER);
-        homeView.setCenter(new StackPane(vBox));
+        }
+        service.initializeService();
     }
 }
