@@ -70,7 +70,6 @@ public class HomePresenter {
             channels.addListener(new InvalidationListener() {
                 @Override
                 public void invalidated(Observable o) {
-                    System.out.println("Called listener...");
                     if (homeView.isShowing()) {
                         changeOrientation(homeView.getScene().getWidth());
                     }
