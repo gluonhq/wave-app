@@ -40,4 +40,5 @@ module com.gluonhq.chat {
     opens com.gluonhq.chat.model to com.gluonhq.cloudlink.client;
 
     exports com.gluonhq.chat;
+    opens com.gluonhq.chat.model.github to com.gluonhq.cloudlink.client;
 }
