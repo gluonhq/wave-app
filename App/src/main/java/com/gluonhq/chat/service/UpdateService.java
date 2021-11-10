@@ -4,34 +4,76 @@ import com.gluonhq.chat.model.GithubRelease;
 import com.gluonhq.connect.GluonObservableList;
 import com.gluonhq.connect.provider.DataProvider;
 import com.gluonhq.connect.provider.RestClient;
+import javafx.application.Platform;
 
-import java.util.Optional;
+import java.io.FileOutputStream;
+import java.io.IOException;
+import java.io.InputStream;
+import java.net.URI;
+import java.net.http.HttpClient;
+import java.net.http.HttpRequest;
+import java.net.http.HttpResponse;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 
 public class UpdateService {
-    
-    private String currentVersion = "1.0.0";
-    private GluonObservableList<GithubRelease> githubReleases;
 
-    boolean isNewVersionAvailable() {
+    static Path installerPath;
+    
+    static String currentVersion() {
+        return "1.0.0";
+    }
+
+    static GluonObservableList<GithubRelease> queryReleases() {
         final RestClient restClient = RestClient.create()
                 .method("GET")
                 .host("https://api.github.com/repos/gluonhq/wave-app/releases");
 
-        githubReleases = DataProvider.retrieveList(
-                restClient.createListDataReader(GithubRelease.class));
+        return DataProvider.retrieveList(restClient.createListDataReader(GithubRelease.class));
+    }
+    
+    static void downloadNewVersion(GithubRelease githubRelease) {
+        GithubRelease.Asset windowsAsset = githubRelease.getAssets().stream()
+                .filter(asset -> asset.getName().contains(".msi"))  // TODO: Improve for multi-platform
+                .findFirst().get();
+        String download_url = windowsAsset.getBrowser_download_url();
+        Path tempFile = Paths.get(System.getProperty("java.io.tmpdir") + "/" + download_url.substring(download_url.lastIndexOf("/") + 1));
+        try {
+            if (Files.exists(tempFile) && Files.size(tempFile) == windowsAsset.getSize()) {
+                System.out.println("File already found:"  + tempFile);
+                installerPath = tempFile;
+                return;
+            }
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
 
-        final Optional<GithubRelease> latestRelease = githubReleases.stream().
-                max((o1, o2) -> compareVersions(o1.getTag_version(), o2.getTag_version()));
-        return latestRelease.isPresent() &&
-            compareVersions(latestRelease.get().getTag_version(), currentVersion) > 0;
+        HttpClient client = HttpClient.newBuilder().followRedirects(HttpClient.Redirect.ALWAYS).build();
+        URI uri = URI.create(download_url);
+        HttpRequest request = HttpRequest.newBuilder().uri(uri).build();
+
+        // use the client to send the asynchronous request
+        InputStream is = client.sendAsync(request, HttpResponse.BodyHandlers.ofInputStream()).thenApply(HttpResponse::body).join();
+        try (FileOutputStream out = new FileOutputStream(tempFile.toString())) {
+            is.transferTo(out);
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+        System.out.println("New Version downloaded at:"  + tempFile);
+        installerPath = tempFile;
+    }
+
+    static void installNewVersion() {
+        try {
+            Runtime.getRuntime().exec("cmd /c start " + installerPath);
+            Platform.exit();
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
     }
     
-    void downloadNewVersion() {
-        // TODO: Find platform specific
-        githubReleases.stream().
-    }
-    
-    private static int compareVersions(String version1, String version2) {
+    static int compareVersions(String version1, String version2) {
         int comparisonResult = 0;
 
         String[] version1Splits = version1.split("\\.");

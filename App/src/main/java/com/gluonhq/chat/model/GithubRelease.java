@@ -19,12 +19,61 @@ public class GithubRelease {
     private boolean prerelease;
     private List<Asset> assets;
 
-    private class Asset {
+    public static class Asset {
         private String id;
         private String url;
         private String node_id;
         private String name;
+        private long size;
         private String browser_download_url;
+
+        public String getId() {
+            return id;
+        }
+
+        public void setId(String id) {
+            this.id = id;
+        }
+
+        public String getUrl() {
+            return url;
+        }
+
+        public void setUrl(String url) {
+            this.url = url;
+        }
+
+        public String getNode_id() {
+            return node_id;
+        }
+
+        public void setNode_id(String node_id) {
+            this.node_id = node_id;
+        }
+
+        public String getName() {
+            return name;
+        }
+
+        public void setName(String name) {
+            this.name = name;
+        }
+
+        public long getSize() {
+            return size;
+        }
+
+        public void setSize(long size) {
+            this.size = size;
+        }
+
+        public String getBrowser_download_url() {
+            return browser_download_url;
+        }
+
+        public void setBrowser_download_url(String browser_download_url) {
+            this.browser_download_url = browser_download_url;
+        }
     }
     
     public GithubRelease() {}
