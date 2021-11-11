@@ -333,16 +333,22 @@ public class WaveService implements Service, ProvisioningClient, MessagingClient
     @Override
     public BooleanProperty newVersionAvailable() {
         BooleanProperty versionAvailable = new SimpleBooleanProperty();
-        GluonObservableList<GithubRelease> githubReleases = UpdateService.queryReleases();
-        githubReleases.setOnSucceeded(e -> {
-            Optional<GithubRelease> latestVersion = githubReleases.stream()
-                    .max((o1, o2) -> compareVersions(o1.getTag_version(), o2.getTag_version()));
-            if (latestVersion.isPresent() &&
-                    compareVersions(latestVersion.get().getTag_version(), currentVersion()) > 0) {
-                downloadNewVersion(latestVersion.get());
-                versionAvailable.set(true);
-            }
-        });
+        String OS = System.getProperty("os.name").toLowerCase();
+        if (OS.contains("win") || OS.contains("mac")) {
+            GluonObservableList<GithubRelease> githubReleases = UpdateService.queryReleases();
+            githubReleases.setOnSucceeded(e -> {
+                Optional<GithubRelease> latestVersion = githubReleases.stream()
+                        .max((o1, o2) -> compareVersions(o1.getTag_version(), o2.getTag_version()));
+                if (latestVersion.isPresent()) {
+                    if (compareVersions(latestVersion.get().getTag_version(), currentVersion()) > 0) {
+                        downloadNewVersion(latestVersion.get());
+                        versionAvailable.set(true);
+                    } else {
+                        deleteExistingFiles();
+                    }
+                }
+            });
+        }
         return versionAvailable;
     }
 

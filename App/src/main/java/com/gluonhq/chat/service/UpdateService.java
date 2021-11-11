@@ -19,8 +19,9 @@ import java.nio.file.Paths;
 
 public class UpdateService {
 
+    private static final String TEMP_DOWNLOAD_DIRECTORY = System.getProperty("java.io.tmpdir");
     static Path installerPath;
-    
+
     static String currentVersion() {
         return "1.0.0";
     }
@@ -29,16 +30,15 @@ public class UpdateService {
         final RestClient restClient = RestClient.create()
                 .method("GET")
                 .host("https://api.github.com/repos/gluonhq/wave-app/releases");
-
         return DataProvider.retrieveList(restClient.createListDataReader(GithubRelease.class));
     }
-    
+
     static void downloadNewVersion(GithubRelease githubRelease) {
         GithubRelease.Asset windowsAsset = githubRelease.getAssets().stream()
-                .filter(asset -> asset.getName().contains(".msi"))  // TODO: Improve for multi-platform
+                .filter(asset -> asset.getName().endsWith(OSFileExtension()))
                 .findFirst().get();
         String download_url = windowsAsset.getBrowser_download_url();
-        Path tempFile = Paths.get(System.getProperty("java.io.tmpdir") + "/" + download_url.substring(download_url.lastIndexOf("/") + 1));
+        Path tempFile = Paths.get(TEMP_DOWNLOAD_DIRECTORY + "/" + download_url.substring(download_url.lastIndexOf("/") + 1));
         try {
             if (Files.exists(tempFile) && Files.size(tempFile) == windowsAsset.getSize()) {
                 System.out.println("File already found:"  + tempFile);
@@ -72,7 +72,7 @@ public class UpdateService {
             e.printStackTrace();
         }
     }
-    
+
     static int compareVersions(String version1, String version2) {
         int comparisonResult = 0;
 
@@ -90,5 +90,31 @@ public class UpdateService {
             }
         }
         return comparisonResult;
+    }
+
+    public static void deleteExistingFiles() {
+        try {
+            Files.list(Paths.get(TEMP_DOWNLOAD_DIRECTORY))
+                 .filter(p -> p.toString().contains("WaveApp") && p.toString().endsWith(OSFileExtension()))
+                 .forEach((p) -> {
+                     try {
+                         Files.deleteIfExists(p);
+                     } catch (Exception e) {
+                         e.printStackTrace();
+                     }
+                 });
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+    }
+
+    private static String OSFileExtension() {
+        String OS = System.getProperty("os.name").toLowerCase();
+        if (OS.contains("win")) {
+            return "msi";
+        } else if (OS.contains("mac")) {
+            return "pkg";
+        }
+        return "";
     }
 }
