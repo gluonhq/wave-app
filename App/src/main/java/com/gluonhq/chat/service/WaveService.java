@@ -342,8 +342,7 @@ public class WaveService implements Service, ProvisioningClient, MessagingClient
                 final String appVersion = currentAppVersion();
                 if (latestVersion.isPresent() && !appVersion.contains("SNAPSHOT")) {
                     if (compareVersions(latestVersion.get().getTag_version(), appVersion) > 0) {
-                        downloadNewVersion(latestVersion.get());
-                        versionAvailable.set(true);
+                        downloadNewVersion(latestVersion.get(), versionAvailable::set);
                     } else {
                         deleteExistingFiles();
                     }

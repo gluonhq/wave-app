@@ -5,6 +5,7 @@ import com.gluonhq.connect.GluonObservableList;
 import com.gluonhq.connect.provider.DataProvider;
 import com.gluonhq.connect.provider.RestClient;
 import javafx.application.Platform;
+import javafx.concurrent.Task;
 
 import java.io.FileOutputStream;
 import java.io.IOException;
@@ -17,10 +18,14 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.Properties;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
+import java.util.function.Consumer;
 
 public class UpdateService {
 
     private static final String TEMP_DOWNLOAD_DIRECTORY = System.getProperty("java.io.tmpdir");
+    private static final ExecutorService executor = Executors.newSingleThreadExecutor();
     static Path installerPath;
 
     static String currentAppVersion() {
@@ -45,35 +50,13 @@ public class UpdateService {
         return DataProvider.retrieveList(restClient.createListDataReader(GithubRelease.class));
     }
 
-    static void downloadNewVersion(GithubRelease githubRelease) {
-        GithubRelease.Asset windowsAsset = githubRelease.getAssets().stream()
-                .filter(asset -> asset.getName().endsWith(OSFileExtension()))
-                .findFirst().get();
-        String download_url = windowsAsset.getBrowser_download_url();
-        Path tempFile = Paths.get(TEMP_DOWNLOAD_DIRECTORY + "/" + download_url.substring(download_url.lastIndexOf("/") + 1));
-        try {
-            if (Files.exists(tempFile) && Files.size(tempFile) == windowsAsset.getSize()) {
-                System.out.println("File already found:"  + tempFile);
-                installerPath = tempFile;
-                return;
-            }
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
-
-        HttpClient client = HttpClient.newBuilder().followRedirects(HttpClient.Redirect.ALWAYS).build();
-        URI uri = URI.create(download_url);
-        HttpRequest request = HttpRequest.newBuilder().uri(uri).build();
-
-        // use the client to send the asynchronous request
-        InputStream is = client.sendAsync(request, HttpResponse.BodyHandlers.ofInputStream()).thenApply(HttpResponse::body).join();
-        try (FileOutputStream out = new FileOutputStream(tempFile.toString())) {
-            is.transferTo(out);
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
-        System.out.println("New Version downloaded at:"  + tempFile);
-        installerPath = tempFile;
+    static void downloadNewVersion(GithubRelease githubRelease, Consumer<Boolean> consumer) {
+        Task<Path> task = new DownloadAssetTask(githubRelease);
+        task.setOnSucceeded(e -> {
+            installerPath = task.getValue();
+            consumer.accept(true);
+        });
+        executor.execute(task);
     }
 
     static void installNewVersion() {
@@ -135,5 +118,45 @@ public class UpdateService {
             return "pkg";
         }
         return "";
+    }
+    
+    private static class DownloadAssetTask extends Task<Path> {
+
+        private final GithubRelease githubRelease;
+
+        public DownloadAssetTask(GithubRelease githubRelease) {
+            this.githubRelease = githubRelease;
+        }
+
+        @Override
+        protected Path call() {
+            GithubRelease.Asset asset = githubRelease.getAssets().stream()
+                    .filter(a -> a.getName().endsWith(OSFileExtension()))
+                    .findFirst().get();
+            String download_url = asset.getBrowser_download_url();
+            Path assetFile = Paths.get(TEMP_DOWNLOAD_DIRECTORY + "/" + download_url.substring(download_url.lastIndexOf("/") + 1));
+            try {
+                if (Files.exists(assetFile) && Files.size(assetFile) == asset.getSize()) {
+                    System.out.println("File already found:" + assetFile);
+                    return assetFile;
+                }
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+
+            HttpClient client = HttpClient.newBuilder().followRedirects(HttpClient.Redirect.ALWAYS).build();
+            URI uri = URI.create(download_url);
+            HttpRequest request = HttpRequest.newBuilder().uri(uri).build();
+
+            // use the client to send the asynchronous request
+            InputStream is = client.sendAsync(request, HttpResponse.BodyHandlers.ofInputStream()).thenApply(HttpResponse::body).join();
+            try (FileOutputStream out = new FileOutputStream(assetFile.toString())) {
+                is.transferTo(out);
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+            System.out.println("New Version downloaded at:" + assetFile);
+            return assetFile;
+        }
     }
 }
