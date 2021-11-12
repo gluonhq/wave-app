@@ -14,6 +14,7 @@
         <mainClassName>com.gluonhq.chat.GluonChat</mainClassName>
         <form.factor>phone</form.factor>
 <!--        <form.factor>tablet</form.factor>-->
+        <app.version>${project.version}</app.version>
     </properties>
 
     <build>
@@ -411,12 +412,6 @@
                     <version>${attachVersion}</version>
                 </dependency>
             </dependencies>
-        </profile>
-        <profile>
-            <id>release</id>
-            <properties>
-                <app.version>${project.version}</app.version>
-            </properties>
         </profile>
     </profiles>
 </project>

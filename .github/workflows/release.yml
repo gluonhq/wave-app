@@ -64,7 +64,7 @@ jobs:
       - name: Build and package
         run: |
           mvn versions:set -DnewVersion=$APP_VERSION -DgenerateBackupPoms=false
-          mvn clean install -Pdesktop,release && mvn package -f App -Pdesktop,release
+          mvn clean install && mvn package -f App
         env:
           APP_VERSION: ${{needs.create-release.outputs.app_version}}
 
@@ -148,7 +148,7 @@ jobs:
         run: |
           ls App/src/main/resources
           mvn versions:set -DnewVersion=$APP_VERSION -DgenerateBackupPoms=false
-          mvn install -Pdesktop,release && mvn gluonfx:build gluonfx:package -f App -Pdesktop,release 
+          mvn install && mvn gluonfx:build gluonfx:package -f App
         env:
           APP_VERSION: ${{needs.create-release.outputs.app_version}}
 
@@ -203,7 +203,7 @@ jobs:
       - name: Build and package
         run: |
           mvn versions:set -DnewVersion=$APP_VERSION -DgenerateBackupPoms=false
-          mvn clean install -Pdesktop,release && mvn package -f App -Pdesktop,release
+          mvn clean install && mvn package -f App
         env:
           APP_VERSION: ${{needs.create-release.outputs.app_version}}
 
@@ -272,7 +272,7 @@ jobs:
       - name: Gluon Build
         run: |
           mvn versions:set -DnewVersion=$APP_VERSION -DgenerateBackupPoms=false
-          mvn clean install -Pdesktop,release && mvn -Pdesktop gluonfx:build -f App -Pdesktop,release
+          mvn clean install && mvn -Pdesktop gluonfx:build -f App
         env:
           APP_VERSION: ${{needs.create-release.outputs.app_version}}
 
@@ -330,7 +330,7 @@ jobs:
       - name: Build and package
         run: |
           mvn versions:set -DnewVersion=$APP_VERSION -DgenerateBackupPoms=false
-          mvn clean install -Pdesktop,release && mvn package -f App -Pdesktop,release
+          mvn clean install && mvn package -f App
         env:
           APP_VERSION: ${{needs.create-release.outputs.app_version}}
 
@@ -401,7 +401,7 @@ jobs:
       - name: Gluon Build
         run: |
           mvn versions:set -DnewVersion=$APP_VERSION -DgenerateBackupPoms=false
-          mvn install -Pdesktop,release && mvn -Pdesktop gluonfx:build gluonfx:package -f App -Pdesktop,release
+          mvn install && mvn -Pdesktop gluonfx:build gluonfx:package -f App
         env:
           APP_VERSION: ${{needs.create-release.outputs.app_version}}
 
