@@ -78,7 +78,14 @@ public class UpdateService {
 
     static void installNewVersion() {
         try {
-            Runtime.getRuntime().exec("cmd /c start " + installerPath);
+            String OS = System.getProperty("os.name").toLowerCase();
+            if (OS.contains("win")) {
+                Runtime.getRuntime().exec("cmd /c start " + installerPath);
+            } else if (OS.contains("mac")) {
+                Runtime.getRuntime().exec("/usr/bin/open " + installerPath);
+            } else {
+                return;
+            }
             Platform.exit();
         } catch (IOException e) {
             e.printStackTrace();
