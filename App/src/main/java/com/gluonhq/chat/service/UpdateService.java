@@ -16,17 +16,29 @@ import java.net.http.HttpResponse;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.util.Properties;
 
 public class UpdateService {
 
     private static final String TEMP_DOWNLOAD_DIRECTORY = System.getProperty("java.io.tmpdir");
     static Path installerPath;
 
-    static String currentVersion() {
-        return "1.0.0";
+    static String currentAppVersion() {
+        String currentVersion = "1.0.0";
+        Properties about = new Properties();
+        try {
+            about.load(UpdateService.class.getResourceAsStream("/about.properties"));
+            String version = about.getProperty("app.version");
+            if (version != null && !version.isEmpty()) {
+                currentVersion = version;
+            }
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+        return currentVersion;
     }
 
-    static GluonObservableList<GithubRelease> queryReleases() {
+        static GluonObservableList<GithubRelease> queryReleases() {
         final RestClient restClient = RestClient.create()
                 .method("GET")
                 .host("https://api.github.com/repos/gluonhq/wave-app/releases");

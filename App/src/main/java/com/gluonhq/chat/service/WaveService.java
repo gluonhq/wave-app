@@ -339,8 +339,9 @@ public class WaveService implements Service, ProvisioningClient, MessagingClient
             githubReleases.setOnSucceeded(e -> {
                 Optional<GithubRelease> latestVersion = githubReleases.stream()
                         .max((o1, o2) -> compareVersions(o1.getTag_version(), o2.getTag_version()));
-                if (latestVersion.isPresent()) {
-                    if (compareVersions(latestVersion.get().getTag_version(), currentVersion()) > 0) {
+                final String appVersion = currentAppVersion();
+                if (latestVersion.isPresent() && !appVersion.contains("SNAPSHOT")) {
+                    if (compareVersions(latestVersion.get().getTag_version(), appVersion) > 0) {
                         downloadNewVersion(latestVersion.get());
                         versionAvailable.set(true);
                     } else {

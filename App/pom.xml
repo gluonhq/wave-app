@@ -152,6 +152,12 @@
                 </executions>
             </plugin>
         </plugins>
+        <resources>
+            <resource>
+                <directory>src/main/resources</directory>
+                <filtering>true</filtering>
+            </resource>
+        </resources>
     </build>
 
     <dependencies>
@@ -405,6 +411,12 @@
                     <version>${attachVersion}</version>
                 </dependency>
             </dependencies>
+        </profile>
+        <profile>
+            <id>release</id>
+            <properties>
+                <app.version>${project.version}</app.version>
+            </properties>
         </profile>
     </profiles>
 </project>
