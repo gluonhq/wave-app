@@ -48,6 +48,8 @@ public class WaveService implements Service, ProvisioningClient, MessagingClient
     private ObservableList<Channel> channels;
 
     public WaveService() {
+        // set this property to edit the time we allow to sync contacts at bootstrap
+       // System.setProperty("com.gluonhq.wave.provisioningTimeout","30000"); // 30 seconds
         wave = WaveManager.getInstance();
         wave.setLogLevel(Level.DEBUG);
         wave.getWaveLogger().log(Level.DEBUG, "Creating waveService: " + System.identityHashCode(wave));
