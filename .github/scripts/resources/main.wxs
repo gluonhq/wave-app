@@ -58,6 +58,12 @@
         IncludeMinimum="$(var.JpUpgradeVersionOnlyDetectDowngrade)" />
     </Upgrade>
 
+    <!--  Read the registry to find an earlier version -->
+    <!-- https://www.firegiant.com/wix/tutorial/getting-started/where-to-install/ -->
+    <Property Id="CHECKREGISTRY">
+        <RegistrySearch Id='WaveAppRegistry' Type='raw' Root='HKCU' Key='SOFTWARE\Gluon\WaveApp' Name='InstallDir' />
+    </Property>
+
     <?ifndef JpAllowUpgrades ?>
     <CustomAction Id="JpDisallowUpgrade" Error="!(loc.DisallowUpgradeErrorMessage)" />
     <?endif?>
@@ -68,10 +74,20 @@
     <!-- Standard required root -->
     <Directory Id="TARGETDIR" Name="SourceDir"/>
 
+    <!--  Store the registry for future version -->
+    <ComponentGroup  Id="RegistryEntriesGroup">
+      <Component Id="RegistryEntries" Directory="TARGETDIR">
+        <RegistryKey Key="SOFTWARE\Gluon\WaveApp" Root="HKCU">
+          <RegistryValue Type="string" Name="InstallDir" Value="[INSTALLDIR]" />
+        </RegistryKey>
+      </Component>
+    </ComponentGroup>
+
     <Feature Id="DefaultFeature" Title="!(loc.MainFeatureTitle)" Level="1">
       <ComponentGroupRef Id="Shortcuts"/>
       <ComponentGroupRef Id="Files"/>
       <ComponentGroupRef Id="FileAssociations"/>
+      <ComponentGroupRef  Id="RegistryEntriesGroup"/>
     </Feature>
 
     <?ifdef JpInstallDirChooser ?>
@@ -116,8 +132,16 @@
         Override the dialog sequence in built-in dialog set "WixUI_InstallDir"
         to exclude license dialog.
       -->
-      <Publish Dialog="WelcomeDlg" Control="Next" Event="NewDialog" Value="InstallDirDlg" Order="2">1</Publish>
-      <Publish Dialog="InstallDirDlg" Control="Back" Event="NewDialog" Value="WelcomeDlg" Order="2">1</Publish>
+      <!--
+        If CHECKREGISTRY is found, don't show InstallDirDlg.
+        Go directly from WelcomeDlg to VerifyReadyDlg.
+      -->
+      <Publish Dialog="WelcomeDlg" Control="Next" Event="NewDialog" Value="InstallDirDlg" Order="2">Not CHECKREGISTRY</Publish>
+      <Publish Dialog="InstallDirDlg" Control="Back" Event="NewDialog" Value="WelcomeDlg" Order="2">Not CHECKREGISTRY</Publish>
+
+      <Publish Dialog="WelcomeDlg" Control="Next" Event="NewDialog" Value="VerifyReadyDlg" Order="2">CHECKREGISTRY</Publish>
+      <Publish Dialog="VerifyReadyDlg" Control="Back" Event="NewDialog" Value="WelcomeDlg" Order="2">CHECKREGISTRY</Publish>
+
       <?endif?>
 
       <?else?>
@@ -127,6 +151,12 @@
       <?endif?>
 
       <?endif?>
+
+      <!-- Launch Application after Finish is pressed -->
+      <Publish Dialog="ExitDialog"
+          Control="Finish"
+          Event="DoAction"
+          Value="LaunchApplication">NOT Installed</Publish>
     </UI>
 
     <?ifdef JpLicenseRtf ?>
@@ -143,6 +173,12 @@
       <?endif?>
       <RemoveExistingProducts Before="CostInitialize"/>
     </InstallExecuteSequence>
+
+    <Property Id="WixShellExecTarget" Value="[INSTALLDIR]\WaveApp.exe" />
+    <CustomAction Id="LaunchApplication"
+        BinaryKey="WixCA"
+        DllEntry="WixShellExec"
+        Impersonate="yes" />
 
   </Product>
 </Wix>
