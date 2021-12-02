@@ -43,7 +43,7 @@ public class UpdateService {
         return currentVersion;
     }
 
-        static GluonObservableList<GithubRelease> queryReleases() {
+    static GluonObservableList<GithubRelease> queryReleases() {
         final RestClient restClient = RestClient.create()
                 .method("GET")
                 .host("https://api.github.com/repos/gluonhq/wave-app/releases");

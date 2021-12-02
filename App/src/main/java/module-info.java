@@ -19,6 +19,7 @@ module com.gluonhq.chat {
     requires com.gluonhq.attach.util;
 
     requires com.gluonhq.maps;
+    requires com.gluonhq.updater;
 
     requires com.gluonhq.chat.ChatListView;
     requires com.gluonhq.emoji;

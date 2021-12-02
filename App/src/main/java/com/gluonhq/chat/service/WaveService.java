@@ -3,20 +3,22 @@ package com.gluonhq.chat.service;
 import com.gluonhq.chat.model.Channel;
 import com.gluonhq.chat.model.ChatImage;
 import com.gluonhq.chat.model.ChatMessage;
-import com.gluonhq.chat.model.GithubRelease;
 import com.gluonhq.chat.model.User;
-import com.gluonhq.connect.GluonObservableList;
 import com.gluonhq.equation.WaveManager;
 import com.gluonhq.equation.message.MessagingClient;
 import com.gluonhq.equation.model.Contact;
 import com.gluonhq.equation.provision.ProvisioningClient;
 import com.gluonhq.equation.util.QRGenerator;
+import com.gluonhq.updater.Updater;
+import com.gluonhq.updater.asset.GithubReleaseAsset;
 import javafx.application.Platform;
+import javafx.beans.InvalidationListener;
 import javafx.beans.property.BooleanProperty;
 import javafx.beans.property.SimpleBooleanProperty;
 import javafx.collections.FXCollections;
 import javafx.collections.ListChangeListener;
 import javafx.collections.ObservableList;
+import javafx.concurrent.Task;
 import javafx.scene.image.Image;
 
 import java.io.File;
@@ -32,10 +34,8 @@ import java.time.Instant;
 import java.time.LocalDateTime;
 import java.time.ZoneId;
 import java.util.*;
+import java.util.concurrent.Executors;
 import java.util.stream.Collectors;
-
-import static com.gluonhq.chat.service.UpdateService.*;
-import javafx.beans.InvalidationListener;
 
 public class WaveService implements Service, ProvisioningClient, MessagingClient {
 
@@ -47,6 +47,7 @@ public class WaveService implements Service, ProvisioningClient, MessagingClient
     private BootstrapClient bootstrapClient;
     private ObservableList<User> users;
     private ObservableList<Channel> channels;
+    private Updater updater;
 
     public WaveService() {
         // set this property to edit the time we allow to sync contacts at bootstrap
@@ -58,6 +59,12 @@ public class WaveService implements Service, ProvisioningClient, MessagingClient
         if (wave.isProvisioned()) {
             login(wave.getMyUuid());
         }
+        updater = new Updater(new GithubReleaseAsset("gluonhq", "wave-app") {
+            @Override
+            public String currentVersion() {
+                return "0.0.0";
+            }
+        });
     }
 
     @Override
@@ -359,28 +366,26 @@ public class WaveService implements Service, ProvisioningClient, MessagingClient
     @Override
     public BooleanProperty newVersionAvailable() {
         BooleanProperty versionAvailable = new SimpleBooleanProperty();
-        String OS = System.getProperty("os.name").toLowerCase();
-        if (OS.contains("win") || OS.contains("mac")) {
-            GluonObservableList<GithubRelease> githubReleases = UpdateService.queryReleases();
-            githubReleases.setOnSucceeded(e -> {
-                Optional<GithubRelease> latestVersion = githubReleases.stream()
-                        .max((o1, o2) -> compareVersions(o1.getTag_version(), o2.getTag_version()));
-                final String appVersion = currentAppVersion();
-                if (latestVersion.isPresent() && !appVersion.contains("SNAPSHOT")) {
-                    if (compareVersions(latestVersion.get().getTag_version(), appVersion) > 0) {
-                        downloadNewVersion(latestVersion.get(), versionAvailable::set);
-                    } else {
-                        deleteExistingFiles();
-                    }
-                }
-            });
-        }
+        final Task<Boolean> task = new Task<>() {
+            @Override
+            protected Boolean call() throws Exception {
+                return updater.isUpdateAvailable();
+            }
+        };
+        task.setOnSucceeded(e -> versionAvailable.set(task.getValue()));
+        Executors.newSingleThreadExecutor().execute(task);
         return versionAvailable;
     }
 
     @Override
     public void installNewVersion() {
-        UpdateService.installNewVersion();
+        updater.downloadInstaller().thenAccept(path -> {
+            try {
+                updater.update(path);
+            } catch (IOException e) {
+                System.out.println("Update failed: " + e.getMessage());
+            }
+        });
     }
 
     /**
