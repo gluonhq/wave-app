@@ -385,7 +385,7 @@ public class WaveService implements Service, ProvisioningClient, MessagingClient
             } catch (IOException e) {
                 System.out.println("Update failed: " + e.getMessage());
             }
-        });
+        }).join();
     }
 
     /**
