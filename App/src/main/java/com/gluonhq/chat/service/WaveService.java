@@ -13,8 +13,8 @@ import com.gluonhq.updater.Updater;
 import com.gluonhq.updater.asset.GithubReleaseAsset;
 import javafx.application.Platform;
 import javafx.beans.InvalidationListener;
-import javafx.beans.property.BooleanProperty;
-import javafx.beans.property.SimpleBooleanProperty;
+import javafx.beans.property.ObjectProperty;
+import javafx.beans.property.SimpleObjectProperty;
 import javafx.collections.FXCollections;
 import javafx.collections.ListChangeListener;
 import javafx.collections.ObservableList;
@@ -48,6 +48,7 @@ public class WaveService implements Service, ProvisioningClient, MessagingClient
     private ObservableList<User> users;
     private ObservableList<Channel> channels;
     private Updater updater;
+    private Path downloadedFile;
 
     public WaveService() {
         // set this property to edit the time we allow to sync contacts at bootstrap
@@ -364,22 +365,28 @@ public class WaveService implements Service, ProvisioningClient, MessagingClient
     }
 
     @Override
-    public BooleanProperty newVersionAvailable() {
-        BooleanProperty versionAvailable = new SimpleBooleanProperty();
+    public ObjectProperty<Path> newVersionAvailable() {
+        ObjectProperty<Path> downloadedFilePath = new SimpleObjectProperty<>();
         final Task<Boolean> task = new Task<>() {
             @Override
             protected Boolean call() {
                 return updater.isUpdateAvailable();
             }
         };
-        task.setOnSucceeded(e -> versionAvailable.set(task.getValue()));
+        task.setOnSucceeded(e -> {
+            if (task.getValue()) {
+                updater.downloadInstaller().thenAccept(t -> {
+                    Platform.runLater(() -> downloadedFilePath.set(t));
+                });
+            }
+        });
         Executors.newSingleThreadExecutor().execute(task);
-        return versionAvailable;
+        return downloadedFilePath;
     }
 
     @Override
-    public void installNewVersion() {
-        updater.downloadInstaller().thenAccept(path -> updater.update(path)).join();
+    public void installNewVersion(Path path) {
+        updater.update(path);
     }
 
     /**
