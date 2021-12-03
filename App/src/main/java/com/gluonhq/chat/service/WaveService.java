@@ -52,7 +52,6 @@ public class WaveService implements Service, ProvisioningClient, MessagingClient
     private ObservableList<User> users;
     private ObservableList<Channel> channels;
     private Updater updater;
-    private Path downloadedFile;
 
     public WaveService() {
         // set this property to edit the time we allow to sync contacts at bootstrap
@@ -67,7 +66,7 @@ public class WaveService implements Service, ProvisioningClient, MessagingClient
         updater = new Updater(new GithubReleaseAsset("gluonhq", "wave-app") {
             @Override
             public String currentVersion() {
-                return "0.0.0";
+                return currentAppVersion();
             }
         });
     }
@@ -443,6 +442,21 @@ public class WaveService implements Service, ProvisioningClient, MessagingClient
         String cuuid = "c" + user.getId();
         Optional<Channel> target = channels.stream().filter(c -> c.getId().equals(cuuid)).findFirst();
         return target;
+    }
+
+    private String currentAppVersion() {
+        String currentVersion = "1.0.0";
+        Properties about = new Properties();
+        try {
+            about.load(WaveService.class.getResourceAsStream("/about.properties"));
+            String version = about.getProperty("app.version");
+            if (version != null && !version.isEmpty()) {
+                currentVersion = version;
+            }
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+        return currentVersion;
     }
 
 }
