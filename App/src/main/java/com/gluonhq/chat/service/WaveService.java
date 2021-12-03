@@ -368,7 +368,7 @@ public class WaveService implements Service, ProvisioningClient, MessagingClient
         BooleanProperty versionAvailable = new SimpleBooleanProperty();
         final Task<Boolean> task = new Task<>() {
             @Override
-            protected Boolean call() throws Exception {
+            protected Boolean call() {
                 return updater.isUpdateAvailable();
             }
         };
@@ -379,13 +379,7 @@ public class WaveService implements Service, ProvisioningClient, MessagingClient
 
     @Override
     public void installNewVersion() {
-        updater.downloadInstaller().thenAccept(path -> {
-            try {
-                updater.update(path);
-            } catch (IOException e) {
-                System.out.println("Update failed: " + e.getMessage());
-            }
-        }).join();
+        updater.downloadInstaller().thenAccept(path -> updater.update(path)).join();
     }
 
     /**
