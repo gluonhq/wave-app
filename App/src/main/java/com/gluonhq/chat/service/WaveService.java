@@ -19,6 +19,10 @@ import javafx.collections.FXCollections;
 import javafx.collections.ListChangeListener;
 import javafx.collections.ObservableList;
 import javafx.concurrent.Task;
+import javafx.event.ActionEvent;
+import javafx.scene.control.Alert;
+import javafx.scene.control.Button;
+import javafx.scene.control.ButtonType;
 import javafx.scene.image.Image;
 
 import java.io.File;
@@ -386,7 +390,12 @@ public class WaveService implements Service, ProvisioningClient, MessagingClient
 
     @Override
     public void installNewVersion(Path path) {
-        updater.update(path);
+        final Alert alert = new Alert(Alert.AlertType.CONFIRMATION);
+        alert.setHeaderText("Install new version?");
+        alert.setContentText("Application will close and installer will run to install the latest version");
+        final Button btOk = (Button) alert.getDialogPane().lookupButton(ButtonType.OK);
+        btOk.addEventFilter(ActionEvent.ACTION, event -> updater.update(path));
+        alert.showAndWait();
     }
 
     /**

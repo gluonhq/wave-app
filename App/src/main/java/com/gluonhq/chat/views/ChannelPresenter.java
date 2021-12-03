@@ -69,7 +69,6 @@ public class ChannelPresenter {
             if (Files.exists(nv)) {
                 notificationPane.getActions().setAll(new Action("Install", ae -> {
                     service.installNewVersion(nv);
-                    notificationPane.hide();
                 }));
                 notificationPane.show();
             }
