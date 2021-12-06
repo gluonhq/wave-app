@@ -35,7 +35,9 @@ import java.util.*;
 import java.util.stream.Collectors;
 
 import static com.gluonhq.chat.service.UpdateService.*;
+import com.gluonhq.equation.model.Group;
 import com.gluonhq.equation.model.Message;
+import java.util.stream.Stream;
 import javafx.beans.InvalidationListener;
 
 public class WaveService implements Service, ProvisioningClient, MessagingClient {
@@ -47,6 +49,7 @@ public class WaveService implements Service, ProvisioningClient, MessagingClient
     private ObservableList<Contact> contacts;
     private BootstrapClient bootstrapClient;
     private ObservableList<User> users;
+    private ObservableList<Group> groups;
     private ObservableList<Channel> channels;
 
     public WaveService() {
@@ -79,10 +82,34 @@ public class WaveService implements Service, ProvisioningClient, MessagingClient
 
     @Override
     public ObservableList<User> getUsers() {
+        System.err.println("WAVEservice, getUsers asked");
         if (this.users == null) {
+            System.err.println("WAVEservice, retrieveUsers asked");
             this.users = retrieveUsers();
         }
         return users;
+    }
+    
+    public ObservableList<Group> getGroups() {
+        if (this.groups == null) {
+            this.groups = retrieveGroups();
+        }
+        return groups;
+    }
+    
+    private ObservableList<Group> retrieveGroups() {
+        ObservableList<Group> answer = FXCollections.observableArrayList();
+        groups = wave.getGroups();
+        answer.addAll(groups);
+        groups.addListener((ListChangeListener.Change<? extends Group> change) -> {
+            while (change.next()) {
+                Stream<? extends Group> addedGroups = change.getAddedSubList().stream();
+                answer.addAll(addedGroups.collect(Collectors.toList()));
+                System.err.println("WAVESERVICE, groups now = "+answer);
+            }
+        });
+        System.err.println("WAVESERVICE initially, groups = "+answer);
+        return answer;
     }
     
     private ObservableList<User> retrieveUsers() {
@@ -90,11 +117,13 @@ public class WaveService implements Service, ProvisioningClient, MessagingClient
         contacts = wave.getContacts();
 
         answer.addAll(contacts.stream()
+                .filter(a -> a.isActive())
                 .map(a -> createUserFromContact(a))
                 .collect(Collectors.toList()));
         contacts.addListener((ListChangeListener.Change<? extends Contact> change) -> {
             while (change.next()) {
                 List<User> addedUsers = change.getAddedSubList().stream()
+                        .filter(a -> a.isActive())
                         .map(contact -> createUserFromContact(contact))
                         .collect(Collectors.toList());
                 Platform.runLater(()-> answer.addAll(addedUsers));
@@ -110,7 +139,9 @@ public class WaveService implements Service, ProvisioningClient, MessagingClient
 
     @Override
     public ObservableList<Channel> getChannels() {
+        System.err.println("WAVE service getchannels asked");
         if (this.channels == null) {
+            System.err.println("WAVE service, needs to retrieve channels");
             this.channels = retrieveChannels();
         }
         return this.channels;
@@ -120,6 +151,8 @@ public class WaveService implements Service, ProvisioningClient, MessagingClient
         ObservableList<Channel> answer = FXCollections.observableArrayList();
         ObservableList<User> users = getUsers();
         answer.addAll(users.stream().map(user -> createChannelFromUser(user))
+                .collect(Collectors.toList()));
+        answer.addAll(getGroups().stream().map(group -> createChannelFromGroup(group))
                 .collect(Collectors.toList()));
         answer.forEach(c -> readMessageForChannel(c));
         answer.addListener((ListChangeListener.Change<? extends Channel> change) -> {
@@ -136,6 +169,19 @@ public class WaveService implements Service, ProvisioningClient, MessagingClient
                 Platform.runLater(() -> answer.addAll(addedChannels));
                 List<Channel> removedChannels = change.getRemoved().stream()
                         .map(user -> findChannelByUser(user, answer))
+                        .filter(opt -> opt.isPresent())
+                        .map(opt -> opt.get()).collect(Collectors.toList());
+                Platform.runLater(() -> answer.removeAll(removedChannels));
+            }
+        });
+        groups.addListener((ListChangeListener.Change<? extends Group> change) -> {
+            while (change.next()) {
+                List<Channel> addedChannels = change.getAddedSubList().stream()
+                        .map(group -> createChannelFromGroup(group))
+                        .collect(Collectors.toList());
+                Platform.runLater(() -> answer.addAll(addedChannels));
+                List<Channel> removedChannels = change.getRemoved().stream()
+                        .map(group -> findChannelByGroup(group, answer))
                         .filter(opt -> opt.isPresent())
                         .map(opt -> opt.get()).collect(Collectors.toList());
                 Platform.runLater(() -> answer.removeAll(removedChannels));
@@ -318,6 +364,39 @@ public class WaveService implements Service, ProvisioningClient, MessagingClient
         return answer;
     }
 
+    private Channel createChannelFromGroup(Group g) {
+        ObservableList<ChatMessage> messages = FXCollections.observableArrayList();
+        Channel answer = new Channel(g, messages);
+        channelMap.put(answer, messages);
+        messages.addListener(new ListChangeListener<ChatMessage>() {
+            @Override
+            public void onChanged(ListChangeListener.Change<? extends ChatMessage> change) {
+                while (change.next()) {
+                    List<? extends ChatMessage> addedmsg = change.getAddedSubList();
+                    System.err.println("Added groupsmsg: "+addedmsg);
+//                    addedmsg.stream().filter((ChatMessage m) -> m.getLocalOriginated())
+//                            .forEach((ChatMessage m) -> {
+//                                String uuid = u.getId();
+//                                try {
+//                                    long time = wave.sendMessage(uuid, m.getMessage(), m.getAttachment());
+//                                    m.setTimestamp(time);
+//                                } catch (IOException ex) {
+//                                    ex.printStackTrace();
+//                                }
+//                                storeMessage(uuid, loggedUser.getId(), m.getMessage(), System.currentTimeMillis());
+//                                if (!uuid.equals(loggedUser.getId())) {
+//                                    answer.setUnread(true);
+//                                }
+//                            });
+//                    if (readUnreadList().contains(answer.getId())) {
+//                        answer.setUnread(true);
+//                    }
+                }
+            }
+        });
+        return answer;
+    }
+
     @Override
     public void gotProvisioningUrl(String url) {
         Image image = QRGenerator.getImage(url);
@@ -456,5 +535,13 @@ public class WaveService implements Service, ProvisioningClient, MessagingClient
         Optional<Channel> target = channels.stream().filter(c -> c.getId().equals(cuuid)).findFirst();
         return target;
     }
+    
+    // we introduce group channels, so need to fix the above soon now.
+    private Optional<Channel> findChannelByGroup(Group group, List<Channel> channels) {
+        String guuid = "g" + group.getName();
+        Optional<Channel> target = channels.stream().filter(c -> c.getId().equals(guuid)).findFirst();
+        return target;
+    }
+
 
 }
