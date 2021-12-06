@@ -7,6 +7,7 @@ import com.gluonhq.chat.model.User;
 import com.gluonhq.equation.WaveManager;
 import com.gluonhq.equation.message.MessagingClient;
 import com.gluonhq.equation.model.Contact;
+import com.gluonhq.equation.model.Message;
 import com.gluonhq.equation.provision.ProvisioningClient;
 import com.gluonhq.equation.util.QRGenerator;
 import com.gluonhq.updater.Updater;
@@ -185,6 +186,11 @@ public class WaveService implements Service, ProvisioningClient, MessagingClient
     public User loggedUser() {
         return loggedUser;
     }
+    
+    @Override
+    public ObservableList<ChatMessage> getMessages(User loggedUser) {
+        return channelMap.get(loggedUser);
+    }
 
     // MESSAGECLIENT
     
@@ -195,6 +201,20 @@ public class WaveService implements Service, ProvisioningClient, MessagingClient
 
     @Override
     public void gotMessage(String senderUuid, String content, long timestamp, String receiverUuid) {
+        Message msg = new Message();
+        msg.senderUuid(senderUuid).content(content).receiverUuid(receiverUuid).timestamp(timestamp);
+        gotMessage(msg);
+    }
+
+    @Override
+    public void gotMessage(Message msg) {
+        String senderUuid = msg.getSenderUuid();
+        String receiverUuid = msg.getReceiverUuid();
+        if (receiverUuid == null) {
+            receiverUuid = msg.getSenderUuid();
+        }
+        String content = msg.getContent();
+        long timestamp = msg.getTimestamp();
         wave.getWaveLogger().log(Level.DEBUG,
                 "GOT MESSAGE from " + senderUuid + " for "+ receiverUuid+" with content " + content);
         Channel dest = getChannelByUuid(senderUuid);
@@ -205,6 +225,7 @@ public class WaveService implements Service, ProvisioningClient, MessagingClient
         }
         User sender = findUserByUuid(senderUuid, users).get();
         ChatMessage chatMessage = new ChatMessage(content, sender, timestamp);
+        chatMessage.setAttachment(msg.getAttachment());
         InvalidationListener il = o -> new InvalidationListener() {
             @Override
             public void invalidated(javafx.beans.Observable obs) {
@@ -220,7 +241,7 @@ public class WaveService implements Service, ProvisioningClient, MessagingClient
         Platform.runLater(() -> dest.getMessages().add(chatMessage));
         storeMessage(receiverUuid, senderUuid, content, timestamp);
     }
-
+    
     @Override
     public void gotTypingAction(String senderUuid, boolean startTyping, boolean stopTyping) {
         Channel dest = getChannelByUuid(senderUuid);
@@ -283,7 +304,7 @@ public class WaveService implements Service, ProvisioningClient, MessagingClient
                             .forEach((ChatMessage m) -> {
                                 String uuid = u.getId();
                                 try {
-                                    long time = wave.sendMessage(uuid, m.getMessage());
+                                    long time = wave.sendMessage(uuid, m.getMessage(), m.getAttachment());
                                     m.setTimestamp(time);
                                 } catch (IOException ex) {
                                     ex.printStackTrace();
