@@ -188,6 +188,11 @@
             <artifactId>equation</artifactId>
             <version>0.9.15</version>
         </dependency>
+        <dependency>
+            <groupId>com.gluonhq</groupId>
+            <artifactId>updater</artifactId>
+            <version>0.0.1</version>
+        </dependency>
 
         <dependency>
             <groupId>javax.annotation</groupId>

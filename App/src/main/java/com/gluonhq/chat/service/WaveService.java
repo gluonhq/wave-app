@@ -3,20 +3,27 @@ package com.gluonhq.chat.service;
 import com.gluonhq.chat.model.Channel;
 import com.gluonhq.chat.model.ChatImage;
 import com.gluonhq.chat.model.ChatMessage;
-import com.gluonhq.chat.model.GithubRelease;
 import com.gluonhq.chat.model.User;
-import com.gluonhq.connect.GluonObservableList;
 import com.gluonhq.equation.WaveManager;
 import com.gluonhq.equation.message.MessagingClient;
 import com.gluonhq.equation.model.Contact;
+import com.gluonhq.equation.model.Message;
 import com.gluonhq.equation.provision.ProvisioningClient;
 import com.gluonhq.equation.util.QRGenerator;
+import com.gluonhq.updater.Updater;
+import com.gluonhq.updater.asset.GithubReleaseAsset;
 import javafx.application.Platform;
-import javafx.beans.property.BooleanProperty;
-import javafx.beans.property.SimpleBooleanProperty;
+import javafx.beans.InvalidationListener;
+import javafx.beans.property.ObjectProperty;
+import javafx.beans.property.SimpleObjectProperty;
 import javafx.collections.FXCollections;
 import javafx.collections.ListChangeListener;
 import javafx.collections.ObservableList;
+import javafx.concurrent.Task;
+import javafx.event.ActionEvent;
+import javafx.scene.control.Alert;
+import javafx.scene.control.Button;
+import javafx.scene.control.ButtonType;
 import javafx.scene.image.Image;
 
 import java.io.File;
@@ -32,11 +39,8 @@ import java.time.Instant;
 import java.time.LocalDateTime;
 import java.time.ZoneId;
 import java.util.*;
+import java.util.concurrent.Executors;
 import java.util.stream.Collectors;
-
-import static com.gluonhq.chat.service.UpdateService.*;
-import com.gluonhq.equation.model.Message;
-import javafx.beans.InvalidationListener;
 
 public class WaveService implements Service, ProvisioningClient, MessagingClient {
 
@@ -48,6 +52,7 @@ public class WaveService implements Service, ProvisioningClient, MessagingClient
     private BootstrapClient bootstrapClient;
     private ObservableList<User> users;
     private ObservableList<Channel> channels;
+    private Updater updater;
 
     public WaveService() {
         // set this property to edit the time we allow to sync contacts at bootstrap
@@ -59,6 +64,12 @@ public class WaveService implements Service, ProvisioningClient, MessagingClient
         if (wave.isProvisioned()) {
             login(wave.getMyUuid());
         }
+        updater = new Updater(new GithubReleaseAsset("gluonhq", "wave-app") {
+            @Override
+            public String currentVersion() {
+                return currentAppVersion();
+            }
+        });
     }
 
     @Override
@@ -378,30 +389,33 @@ public class WaveService implements Service, ProvisioningClient, MessagingClient
     }
 
     @Override
-    public BooleanProperty newVersionAvailable() {
-        BooleanProperty versionAvailable = new SimpleBooleanProperty();
-        String OS = System.getProperty("os.name").toLowerCase();
-        if (OS.contains("win") || OS.contains("mac")) {
-            GluonObservableList<GithubRelease> githubReleases = UpdateService.queryReleases();
-            githubReleases.setOnSucceeded(e -> {
-                Optional<GithubRelease> latestVersion = githubReleases.stream()
-                        .max((o1, o2) -> compareVersions(o1.getTag_version(), o2.getTag_version()));
-                final String appVersion = currentAppVersion();
-                if (latestVersion.isPresent() && !appVersion.contains("SNAPSHOT")) {
-                    if (compareVersions(latestVersion.get().getTag_version(), appVersion) > 0) {
-                        downloadNewVersion(latestVersion.get(), versionAvailable::set);
-                    } else {
-                        deleteExistingFiles();
-                    }
-                }
-            });
-        }
-        return versionAvailable;
+    public ObjectProperty<Path> newVersionAvailable() {
+        ObjectProperty<Path> downloadedFilePath = new SimpleObjectProperty<>();
+        final Task<Boolean> task = new Task<>() {
+            @Override
+            protected Boolean call() {
+                return updater.isUpdateAvailable();
+            }
+        };
+        task.setOnSucceeded(e -> {
+            if (task.getValue()) {
+                updater.downloadInstaller().thenAccept(t -> {
+                    Platform.runLater(() -> downloadedFilePath.set(t));
+                });
+            }
+        });
+        Executors.newSingleThreadExecutor().execute(task);
+        return downloadedFilePath;
     }
 
     @Override
-    public void installNewVersion() {
-        UpdateService.installNewVersion();
+    public void installNewVersion(Path path) {
+        final Alert alert = new Alert(Alert.AlertType.CONFIRMATION);
+        alert.setHeaderText("Install new version?");
+        alert.setContentText("Application will close and installer will run to install the latest version");
+        final Button btOk = (Button) alert.getDialogPane().lookupButton(ButtonType.OK);
+        btOk.addEventFilter(ActionEvent.ACTION, event -> updater.update(path));
+        alert.showAndWait();
     }
 
     /**
@@ -449,6 +463,21 @@ public class WaveService implements Service, ProvisioningClient, MessagingClient
         String cuuid = "c" + user.getId();
         Optional<Channel> target = channels.stream().filter(c -> c.getId().equals(cuuid)).findFirst();
         return target;
+    }
+
+    private String currentAppVersion() {
+        String currentVersion = "1.0.0";
+        Properties about = new Properties();
+        try {
+            about.load(WaveService.class.getResourceAsStream("/about.properties"));
+            String version = about.getProperty("app.version");
+            if (version != null && !version.isEmpty()) {
+                currentVersion = version;
+            }
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+        return currentVersion;
     }
 
 }

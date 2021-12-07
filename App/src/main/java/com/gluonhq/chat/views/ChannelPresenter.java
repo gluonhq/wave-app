@@ -16,6 +16,7 @@ import org.controlsfx.control.NotificationPane;
 import org.controlsfx.control.action.Action;
 
 import javax.inject.Inject;
+import java.nio.file.Files;
 import java.time.LocalDateTime;
 import java.util.Comparator;
 import java.util.ResourceBundle;
@@ -64,12 +65,11 @@ public class ChannelPresenter {
             }
         });
         notificationPane.setText("Update Available");
-        notificationPane.getActions().addAll(new Action("Install", ae -> {
-            service.installNewVersion();
-            notificationPane.hide();
-        }));
         service.newVersionAvailable().addListener((o, ov, nv) -> {
-            if (nv) {
+            if (Files.exists(nv)) {
+                notificationPane.getActions().setAll(new Action("Install", ae -> {
+                    service.installNewVersion(nv);
+                }));
                 notificationPane.show();
             }
         });
