@@ -1,0 +1,30 @@
+<?xml version="1.0" encoding="utf-8"?>
+
+<Wix xmlns="http://schemas.microsoft.com/wix/2006/wi"
+     xmlns:util="http://schemas.microsoft.com/wix/UtilExtension">
+
+  <Fragment>
+
+    <Binary Id="JpCaDll" SourceFile="wixhelper.dll"/>
+    <CustomAction Id="JpCheckInstallDir" BinaryKey="JpCaDll" DllEntry="CheckInstallDir" />
+
+    <UI>
+      <Dialog Id="InstallDirNotEmptyDlg" Width="300" Height="85" Title="!(loc.InstallDirNotEmptyDlg_Title)">
+        <Control Id="Yes" Type="PushButton" X="100" Y="55" Width="50" Height="15" Default="no" Cancel="no" Text="!(loc.WixUIYes)">
+          <Publish Event="NewDialog" Value="$(var.JpAfterInstallDirDlg)">1</Publish>
+        </Control>
+        <Control Id="No" Type="PushButton" X="150" Y="55" Width="50" Height="15" Default="yes" Cancel="yes" Text="!(loc.WixUINo)">
+          <Publish Event="NewDialog" Value="InstallDirDlg">1</Publish>
+        </Control>
+        <Control Id="Text" Type="Text" X="25" Y="15" Width="250" Height="30" TabSkip="no">
+          <Text>!(loc.message.install.dir.exist)</Text>
+        </Control>
+      </Dialog>
+
+      <Publish Dialog="InstallDirDlg" Control="Next" Event="DoAction" Value="JpCheckInstallDir" Order="3">1</Publish>
+      <Publish Dialog="InstallDirDlg" Control="Next" Event="NewDialog" Value="InstallDirNotEmptyDlg" Order="5">INSTALLDIR_VALID="0"</Publish>
+      <Publish Dialog="InstallDirDlg" Control="Next" Event="NewDialog" Value="$(var.JpAfterInstallDirDlg)" Order="5">INSTALLDIR_VALID="1"</Publish>
+
+    </UI>
+  </Fragment>
+</Wix>

@@ -1,0 +1,12 @@
+<?xml version="1.0" ?>
+<Wix xmlns="http://schemas.microsoft.com/wix/2006/wi" xmlns:util="http://schemas.microsoft.com/wix/UtilExtension">
+  <Fragment>
+    <Property Id="WIXUI_INSTALLDIR" Value="INSTALLDIR"></Property>
+    <UI Id="JpUI">
+      <UIRef Id="WixUI_InstallDir"></UIRef>
+      <DialogRef Id="InstallDirNotEmptyDlg"></DialogRef>
+      <Publish Dialog="WelcomeDlg" Control="Next" Event="NewDialog" Value="InstallDirDlg" Order="6">NOT Installed</Publish>
+      <Publish Dialog="InstallDirDlg" Control="Back" Event="NewDialog" Value="WelcomeDlg" Order="6">NOT Installed</Publish>
+    </UI>
+  </Fragment>
+</Wix>
