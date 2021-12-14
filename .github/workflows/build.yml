@@ -207,6 +207,7 @@ jobs:
           GLUON_MACSIGN_USER: ${{ secrets.GLUON_MACSIGN_USER }}
 
       - name: Notarize Installer
+        if: ${{ github.ref == 'refs/heads/master' }}
         uses: erwin1/xcode-notarize@main
         with:
           product-path: ${{ steps.outputfile.outputs.path }}
@@ -229,6 +230,7 @@ jobs:
           path: staging
 
       - name: Provisioning Profile
+        if: ${{ github.ref == 'refs/heads/master' }}
         id: provisioning
         uses: Apple-Actions/download-provisioning-profiles@v1.0.1
         with:
@@ -243,6 +245,7 @@ jobs:
           find /Users/runner/Library/MobileDevice -name '*.mobileprovision' -exec sh -c 'mv "$0" "${0%.mobileprovision}.provisionprofile"' {} \;
 
       - name: 3rd Party Mac certificate
+        if: ${{ github.ref == 'refs/heads/master' }}
         uses: Apple-Actions/import-codesign-certs@v1
         with:
           keychain: ${{ github.run_id }}
@@ -266,6 +269,7 @@ jobs:
           path: ${{ steps.outputfilestore.outputs.path }}
 
       - name: Upload App Store TestFlight
+        if: ${{ github.ref == 'refs/heads/master' }}
         uses: Apple-Actions/upload-testflight-build@master
         with:
           app-path: ${{ steps.outputfilestore.outputs.path }}
