@@ -182,6 +182,7 @@ jobs:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
       - name: Developer ID Application certificate
+        if: ${{ github.ref == 'refs/heads/master' }}
         uses: Apple-Actions/import-codesign-certs@v1
         with:
           keychain: ${{ github.run_id }}
