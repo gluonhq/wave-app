@@ -66,7 +66,10 @@ public class WaveService implements Service, ProvisioningClient, MessagingClient
 
     @Override
     public void initializeService() {
+        System.err.println("WAVESERVICE INIT");
         this.wave.initialize();
+        System.err.println("WAVESERVICE INIT DONE");
+
     }
 
     @Override
@@ -115,11 +118,16 @@ public class WaveService implements Service, ProvisioningClient, MessagingClient
     private ObservableList<User> retrieveUsers() {
         ObservableList<User> answer = FXCollections.observableArrayList();
         contacts = wave.getContacts();
-
-        answer.addAll(contacts.stream()
-                .filter(a -> a.isActive())
-                .map(a -> createUserFromContact(a))
-                .collect(Collectors.toList()));
+        for (Contact contact : contacts) {
+            if (contact.isActive()) {
+                User u = createUserFromContact(contact);
+                answer.add(u);
+            }
+        }
+//        answer.addAll(contacts.stream()
+//                .filter(a -> a.isActive())
+//                .map(a -> createUserFromContact(a))
+//                .collect(Collectors.toList()));
         contacts.addListener((ListChangeListener.Change<? extends Contact> change) -> {
             while (change.next()) {
                 List<User> addedUsers = change.getAddedSubList().stream()
@@ -144,6 +152,7 @@ public class WaveService implements Service, ProvisioningClient, MessagingClient
             System.err.println("WAVE service, needs to retrieve channels");
             this.channels = retrieveChannels();
         }
+        System.err.println("WAVE service, got channels: "+this.channels);
         return this.channels;
     }
     
@@ -192,6 +201,10 @@ public class WaveService implements Service, ProvisioningClient, MessagingClient
 
     private void readMessageForChannel(Channel c) {
         try {
+            if (!c.isDirect()) {
+                System.err.println("GROUPCHANNELS not yet supported 100%");
+                return;
+            } 
             User user = c.getMembers().get(0);
             String id = user.getId();
             File contactsDir = wave.SIGNAL_FX_CONTACTS_DIR;
@@ -252,7 +265,13 @@ public class WaveService implements Service, ProvisioningClient, MessagingClient
         long timestamp = msg.getTimestamp();
         wave.getWaveLogger().log(Level.DEBUG,
                 "GOT MESSAGE from " + senderUuid + " for "+ receiverUuid+" with content " + content);
-        Channel dest = getChannelByUuid(senderUuid);
+        Channel dest;
+        if (msg.getGroup()!= null) {
+            Group g = msg.getGroup();
+            dest = getChannelByGroup(g);
+        } else {
+            dest = getChannelByUuid(senderUuid);
+        }
         if (dest == null) {
             wave.getWaveLogger().log(Level.WARNING, "unknown sender for incoming message: "
                     +senderUuid+"\nIgnoring message.");
@@ -374,20 +393,20 @@ public class WaveService implements Service, ProvisioningClient, MessagingClient
                 while (change.next()) {
                     List<? extends ChatMessage> addedmsg = change.getAddedSubList();
                     System.err.println("Added groupsmsg: "+addedmsg);
-//                    addedmsg.stream().filter((ChatMessage m) -> m.getLocalOriginated())
-//                            .forEach((ChatMessage m) -> {
-//                                String uuid = u.getId();
-//                                try {
-//                                    long time = wave.sendMessage(uuid, m.getMessage(), m.getAttachment());
-//                                    m.setTimestamp(time);
-//                                } catch (IOException ex) {
-//                                    ex.printStackTrace();
-//                                }
-//                                storeMessage(uuid, loggedUser.getId(), m.getMessage(), System.currentTimeMillis());
-//                                if (!uuid.equals(loggedUser.getId())) {
-//                                    answer.setUnread(true);
-//                                }
-//                            });
+                    addedmsg.stream().filter((ChatMessage m) -> m.getLocalOriginated())
+                            .forEach((ChatMessage m) -> {
+                                String uuid = g.getName();
+                                try {
+                                    long time = wave.sendGroupMessage(uuid, m.getMessage(), m.getAttachment());
+                                    m.setTimestamp(time);
+                                } catch (IOException ex) {
+                                    ex.printStackTrace();
+                                }
+                                storeMessage(uuid, loggedUser.getId(), m.getMessage(), System.currentTimeMillis());
+                                if (!uuid.equals(loggedUser.getId())) {
+                                    answer.setUnread(true);
+                                }
+                            });
 //                    if (readUnreadList().contains(answer.getId())) {
 //                        answer.setUnread(true);
 //                    }
@@ -504,7 +523,16 @@ public class WaveService implements Service, ProvisioningClient, MessagingClient
         return dest;
     }
     
+    private Channel getChannelByGroup(Group group) {
+        Channel answer = this.channels.stream()
+                .filter(c -> c.getId().equals("g"+group.getName()))
+                .findFirst().orElse(null);
+        System.err.println("CBG for "+group+" returns "+answer);
+        return answer;
+    }
+    
     private static User createUserFromContact(Contact c) {
+        System.err.println("CREATEUSERFROMCONTACT "+c);
         String firstName = c.getName();
         if ((c.getName() == null) || (c.getName().isEmpty())) {
             firstName = c.getNr();

@@ -27,13 +27,18 @@ public class LoginPresenter implements BootstrapClient{
     @FXML private ResourceBundle resources;
 
     public void initialize() {
+        System.err.println("LOGINPRESENTER init");
         loginView.setOnShowing(e -> {
+            Thread.dumpStack();
+            System.err.println("LOGINPRESENTER showing!");
             AppManager.getInstance().getAppBar().setVisible(false);
             AppManager.getInstance().getAppBar().setManaged(false);
         });
         if (service.loggedUser() != null) {
+            System.err.println("LOGINPRESENTER nu");
             nextStep();
         } else {
+            System.err.println("LOGINPRESENTER bootstrap");
             service.bootstrap(this);
         }
     }
@@ -60,6 +65,8 @@ public class LoginPresenter implements BootstrapClient{
     }
 
     private void nextStep() {
+        System.err.println("LOGINPRESENTER, nextstep!");
+        Thread.dumpStack();
         AppViewManager.FIRST_VIEW.switchView(ViewStackPolicy.SKIP);
     }
 }
