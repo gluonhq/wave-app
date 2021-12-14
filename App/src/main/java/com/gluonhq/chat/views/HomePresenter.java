@@ -36,7 +36,6 @@ public class HomePresenter {
 
         homeView.showingProperty().addListener((obs, ov, nv) -> {
             System.err.println("HOMEPRESENTER shoing: "+nv);
-            Thread.dumpStack();
             if (nv) {
                 AppManager.getInstance().getAppBar().setVisible(false);
                 setupView();
@@ -53,7 +52,6 @@ public class HomePresenter {
             AppViewManager.LOGIN_VIEW.switchView(ViewStackPolicy.SKIP);
         } else {
             showProgressIndicator();
-            Thread.dumpStack();
         }
     }
 

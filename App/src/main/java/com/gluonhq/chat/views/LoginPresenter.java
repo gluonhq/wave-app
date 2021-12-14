@@ -29,7 +29,6 @@ public class LoginPresenter implements BootstrapClient{
     public void initialize() {
         System.err.println("LOGINPRESENTER init");
         loginView.setOnShowing(e -> {
-            Thread.dumpStack();
             System.err.println("LOGINPRESENTER showing!");
             AppManager.getInstance().getAppBar().setVisible(false);
             AppManager.getInstance().getAppBar().setManaged(false);
@@ -66,7 +65,6 @@ public class LoginPresenter implements BootstrapClient{
 
     private void nextStep() {
         System.err.println("LOGINPRESENTER, nextstep!");
-        Thread.dumpStack();
         AppViewManager.FIRST_VIEW.switchView(ViewStackPolicy.SKIP);
     }
 }
