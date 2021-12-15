@@ -15,6 +15,7 @@
         <form.factor>phone</form.factor>
 <!--        <form.factor>tablet</form.factor>-->
         <app.version>${project.version}</app.version>
+        <skip.signing>true</skip.signing>
         <app.label/>
         <mac.app.store/>
         <mac.signing.user.name/>
@@ -131,6 +132,7 @@
                         <macSigningUserName>${mac.signing.user.name}</macSigningUserName>
                         <bundleShortVersion>${bundle.short.version}</bundleShortVersion>
                         <bundleVersion>${bundle.version}</bundleVersion>
+                        <skipSigning>${skip.signing}</skipSigning>
                         <!-- for Android -->
                         <appLabel>${app.label}</appLabel>
                         <versionCode>${version.code}</versionCode>
