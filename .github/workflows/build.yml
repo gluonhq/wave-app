@@ -190,8 +190,11 @@ jobs:
           gluon-license: ${{ secrets.GLUON_LICENSE }}
           dir: App
 
-      - name: Gluon Build
-        run: mvn clean install && mvn -Pdesktop gluonfx:build -f App
+      - name: Gluon Build and Package
+        run: |
+          mvn clean install && mvn -Pdesktop,mac gluonfx:build gluonfx:package -f App
+        env:
+          GLUON_MACSIGN_USER: ${{ secrets.GLUON_MACSIGN_USER }}
 
       - name: Copy native image to staging
         run: |

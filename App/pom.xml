@@ -15,6 +15,18 @@
         <form.factor>phone</form.factor>
 <!--        <form.factor>tablet</form.factor>-->
         <app.version>${project.version}</app.version>
+        <skip.signing>true</skip.signing>
+        <app.label/>
+        <mac.app.store/>
+        <mac.signing.user.name/>
+        <bundle.version/>
+        <bundle.short.version/>
+        <version.code/>
+        <version.name/>
+        <provided.keystore.path/>
+        <provided.keystore.password/>
+        <provided.key.alias/>
+        <provided.key.alias.password/>
     </properties>
 
     <build>
@@ -115,16 +127,21 @@
                     <verbose>false</verbose>
                     <mainClass>${mainClassName}</mainClass>
                     <releaseConfiguration>
-                        <appLabel>ChatApp</appLabel>
-                        <versionCode>2</versionCode>
-                        <versionName>1.0.1</versionName>
-                        <providedKeyStorePath>${android-keystore-path}</providedKeyStorePath>
-                        <providedKeyStorePassword>${android-keystore-password}</providedKeyStorePassword>
-                        <providedKeyAlias>${android-key-alias}</providedKeyAlias>
-                        <providedKeyAliasPassword>${android-key-password}</providedKeyAliasPassword>
+                        <!-- for macOS/iOS -->
+                        <macAppStore>${mac.app.store}</macAppStore>
+                        <macSigningUserName>${mac.signing.user.name}</macSigningUserName>
+                        <bundleShortVersion>${bundle.short.version}</bundleShortVersion>
+                        <bundleVersion>${bundle.version}</bundleVersion>
+                        <skipSigning>${skip.signing}</skipSigning>
+                        <!-- for Android -->
+                        <appLabel>${app.label}</appLabel>
+                        <versionCode>${version.code}</versionCode>
+                        <versionName>${version.name}</versionName>
+                        <providedKeyStorePath>${provided.keystore.path}</providedKeyStorePath>
+                        <providedKeyStorePassword>${provided.keystore.password}</providedKeyStorePassword>
+                        <providedKeyAlias>${provided.key.alias}</providedKeyAlias>
+                        <providedKeyAliasPassword>${provided.key.alias.password}</providedKeyAliasPassword>
 
-                        <bundleVersion>1.0.6</bundleVersion>
-                        <bundleShortVersion>1.0.6</bundleShortVersion>
                         <providedSigningIdentity>iPhone Distribution: Gluon Software BVBA (S7ZR395D8U)</providedSigningIdentity>
                         <providedProvisioningProfile>ChatApp</providedProvisioningProfile>
                         <skipSigning>true</skipSigning>
@@ -250,7 +267,7 @@
             <scope>runtime</scope>
             <classifier>module</classifier>
         </dependency>
-        
+
         <!-- Attach -->
         <dependency>
             <groupId>com.gluonhq.attach</groupId>
@@ -344,42 +361,32 @@
                     <artifactId>position</artifactId>
                     <version>1.1.0</version>
                 </dependency>
-
-                <!-- Attach for javafx:run -->
-                <dependency>
-                    <groupId>com.gluonhq.attach</groupId>
-                    <artifactId>cache</artifactId>
-                    <version>${attachVersion}</version>
-                    <classifier>desktop</classifier>
-                    <scope>runtime</scope>
-                </dependency>
-                <dependency>
-                    <groupId>com.gluonhq.attach</groupId>
-                    <artifactId>display</artifactId>
-                    <version>${attachVersion}</version>
-                    <classifier>desktop</classifier>
-                    <scope>runtime</scope>
-                </dependency>
-                <dependency>
-                    <groupId>com.gluonhq.attach</groupId>
-                    <artifactId>lifecycle</artifactId>
-                    <version>${attachVersion}</version>
-                    <classifier>desktop</classifier>
-                    <scope>runtime</scope>
-                </dependency>
-                <dependency>
-                    <groupId>com.gluonhq.attach</groupId>
-                    <artifactId>storage</artifactId>
-                    <version>${attachVersion}</version>
-                    <classifier>desktop</classifier>
-                    <scope>runtime</scope>
-                </dependency>
             </dependencies>
+        </profile>
+        <profile>
+            <id>mac</id>
+            <properties>
+                <mac.app.store>false</mac.app.store>
+                <mac.signing.user.name>${env.GLUON_MACSIGN_USER}</mac.signing.user.name>
+                <bundle.version>1.0.${env.GITHUB_RUN_NUMBER}</bundle.version>
+                <bundle.short.version>1.0.0</bundle.short.version>
+            </properties>
+        </profile>
+        <profile>
+            <id>macstore</id>
+            <properties>
+                <mac.app.store>true</mac.app.store>
+                <mac.signing.user.name>${env.GLUON_MACSIGN_USER}</mac.signing.user.name>
+                <bundle.version>1.0.${env.GITHUB_RUN_NUMBER}</bundle.version>
+                <bundle.short.version>1.0.0</bundle.short.version>
+            </properties>
         </profile>
         <profile>
             <id>ios</id>
             <properties>
                 <gluonfxTarget>ios</gluonfxTarget>
+                <bundle.version>$1.0.{env.GITHUB_RUN_NUMBER}</bundle.version>
+                <bundle.short.version>1.0.6</bundle.short.version>
             </properties>
             <dependencies>
                 <!-- Attach -->
@@ -399,6 +406,13 @@
             <id>android</id>
             <properties>
                 <gluonfxTarget>android</gluonfxTarget>
+                <app.label>WaveApp</app.label>
+                <version.code>1.0.${env.GITHUB_RUN_NUMBER}</version.code>
+                <version.name>1.0.1</version.name>
+                <provided.keystore.path>${env.GLUON_ANDROID_KEYSTOREPATH}</provided.keystore.path>
+                <provided.keystore.password>${env.GLUON_ANDROID_KEYSTORE_PASSWORD}</provided.keystore.password>
+                <provided.key.alias>${env.GLUON_ANDROID_KEYALIAS}</provided.key.alias>
+                <provided.key.alias.password>${env.GLUON_ANDROID_KEYALIAS_PASSWORD}</provided.key.alias.password>
             </properties>
             <dependencies>
                 <!-- Attach -->
