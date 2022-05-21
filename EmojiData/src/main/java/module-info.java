@@ -1,7 +1,8 @@
 module com.gluonhq.emoji {
     requires javafx.controls;
-    requires com.google.gson;
-    opens com.gluonhq.emoji to com.google.gson;
+    requires java.json;
+    requires com.gluonhq.connect;
+    opens com.gluonhq.emoji to com.gluonhq.connect;
 
     exports com.gluonhq.emoji;
     exports com.gluonhq.emoji.util;

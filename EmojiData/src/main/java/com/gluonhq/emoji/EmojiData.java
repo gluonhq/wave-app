@@ -1,18 +1,20 @@
 package com.gluonhq.emoji;
 
-import com.google.gson.Gson;
-import com.google.gson.reflect.TypeToken;
-import com.google.gson.stream.JsonReader;
+import com.gluonhq.connect.converter.InputStreamIterableInputConverter;
+import com.gluonhq.connect.converter.JsonIterableInputConverter;
+import com.gluonhq.connect.provider.InputStreamListDataReader;
+import com.gluonhq.connect.provider.ListDataReader;
+import com.gluonhq.connect.source.BasicInputDataSource;
+import com.gluonhq.connect.source.InputDataSource;
 
 import java.io.IOException;
 import java.io.InputStream;
-import java.io.InputStreamReader;
 import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.HashMap;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
-import java.util.Objects;
 import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Collectors;
@@ -33,11 +35,11 @@ public class EmojiData {
     static  {
         // https://github.com/iamcal/emoji-data/blob/master/emoji.json
         try (final InputStream emojiStream = EmojiData.class.getResourceAsStream("emoji.json")) {
-            Gson gson = new Gson();
-            JsonReader reader = new JsonReader(new InputStreamReader(Objects.requireNonNull(emojiStream)));
-
-            List<Emoji> emojis = gson.fromJson(reader, new TypeToken<List<Emoji>>(){}.getType());
-            emojis.forEach(e -> {
+            InputDataSource dataSource = new BasicInputDataSource(emojiStream);
+            InputStreamIterableInputConverter<Emoji> converter = new EmojiIterableInputConverter(Emoji.class);
+            ListDataReader<Emoji> listDataReader = new InputStreamListDataReader<>(dataSource, converter);
+            for (Iterator<Emoji> it = listDataReader.iterator(); it.hasNext();) {
+                Emoji e = it.next();
                 EMOJI_UNICODE_MAP.put(e.getUnified(), e);
                 e.getShort_name().ifPresent(s -> EMOJI_MAP.put(s, e));
                 if (e.getSkin_variations() != null) {
@@ -47,7 +49,7 @@ public class EmojiData {
                                 v.getShort_name().ifPresent(s -> EMOJI_MAP.put(s, v));
                             });
                 }
-            });
+            }
         } catch (IOException e) {
             System.err.println("Could not load emoji json file" + e.getMessage());
         }

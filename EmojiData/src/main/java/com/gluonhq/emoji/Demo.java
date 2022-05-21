@@ -18,9 +18,9 @@ public class Demo extends Application {
     public void start(Stage primaryStage) throws Exception {
         TextFlow textFlow = new TextFlow();
         List<String> emojis = Arrays.stream(sFullSeparatedEmojis.split("\\|")).collect(Collectors.toList());
-//        Collections.shuffle(collect);
-//        Collections.reverse(collect);
-//        Collections.sort(collect);
+//        Collections.shuffle(emojis);
+//        Collections.reverse(emojis);
+//        Collections.sort(emojis);
         textFlow.getChildren().addAll(TextUtils.convertToTextAndImageNodes(String.join("", emojis)));
         ScrollPane pane = new ScrollPane(textFlow);
         Scene scene = new Scene(pane, 800, 800);
