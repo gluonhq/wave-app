@@ -2,6 +2,7 @@ package com.gluonhq.emoji;
 
 import org.junit.jupiter.api.Test;
 
+import static com.gluonhq.emoji.EmojiData.emojiFromUnicode;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static com.gluonhq.emoji.EmojiData.emojiForText;
@@ -33,5 +34,15 @@ public class EmojiDataTest {
     public void emojiForColonTextTest() {
         assertNotNull(emojiFromCodeName(":smile:"));
         assertNotNull(emojiFromCodeName(":kissing:"));
+    }
+
+    @Test
+    public void emojiFoUnicode() {
+        assertNotNull(emojiFromUnicode("1F44B"));
+    }
+
+    @Test
+    public void emojiForSkinTone() {
+        assertNotNull(emojiFromUnicode("1F44B-1F3FC"));
     }
 }
