@@ -1,7 +1,6 @@
 package com.gluonhq.emoji;
 
 import com.gluonhq.connect.converter.InputStreamIterableInputConverter;
-import com.gluonhq.connect.converter.JsonIterableInputConverter;
 import com.gluonhq.connect.provider.InputStreamListDataReader;
 import com.gluonhq.connect.provider.ListDataReader;
 import com.gluonhq.connect.source.BasicInputDataSource;
