@@ -209,3 +209,7 @@
 .foot-box > .skin-button:hover > .arrow-button {
     visibility: visible;
 }
+
+.foot-box > .skin-button:openvertically .menu-item:focused {
+    -fx-selection-bar: rgba(150, 200, 200, 0.25);
+}
