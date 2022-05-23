@@ -7,6 +7,8 @@ import javafx.event.ActionEvent;
 import javafx.event.EventHandler;
 import javafx.scene.Node;
 import javafx.scene.control.Label;
+import javafx.scene.control.MenuButton;
+import javafx.scene.control.RadioMenuItem;
 import javafx.scene.control.ScrollPane;
 import javafx.scene.control.TextField;
 import javafx.scene.control.ToggleButton;
@@ -17,6 +19,7 @@ import javafx.scene.input.MouseEvent;
 import javafx.scene.layout.BorderPane;
 import javafx.scene.layout.GridPane;
 import javafx.scene.layout.HBox;
+import javafx.scene.layout.Pane;
 import javafx.scene.layout.Priority;
 import javafx.scene.layout.Region;
 import javafx.scene.layout.StackPane;
@@ -31,6 +34,7 @@ import com.gluonhq.emoji.util.EmojiImageUtils;
 import java.util.List;
 import java.util.Locale;
 import java.util.ResourceBundle;
+import java.util.stream.Stream;
 
 import static com.gluonhq.emoji.EmojiData.emojiFromCategory;
 import static com.gluonhq.emoji.EmojiData.search;
@@ -65,7 +69,19 @@ public class EmojiPopOver extends PopOver {
     public final void setOnAction(EventHandler<ActionEvent> value) {
         onAction.set(value);
     }
-    
+
+    // skinToneProperty
+    private final ObjectProperty<EmojiSkinTone> skinToneProperty = new SimpleObjectProperty<>(this, "skinTone", EmojiSkinTone.NO_SKIN_TONE);
+    public final ObjectProperty<EmojiSkinTone> skinToneProperty() {
+       return skinToneProperty;
+    }
+    public final EmojiSkinTone getSkinTone() {
+       return skinToneProperty.get();
+    }
+    public final void setSkinTone(EmojiSkinTone value) {
+        skinToneProperty.set(value);
+    }
+
     private Node createContent() {
         final TopPanel topPanel = new TopPanel();
         final EmojiPanel emojiPanel = new EmojiPanel(topPanel.getSelected());
@@ -134,9 +150,10 @@ public class EmojiPopOver extends PopOver {
     
     private class EmojiPanel extends BorderPane {
 
-        private ObjectProperty<Emoji> focusedEmoji;
+        private final ObjectProperty<Emoji> focusedEmoji;
         private final GridPane content;
-        
+        private final ToggleGroup skinToneToogleGroup = new ToggleGroup();
+
         // category
         private final ObjectProperty<EmojiCategory> category = new SimpleObjectProperty<>(this, "category");
         final ObjectProperty<EmojiCategory> categoryProperty() {
@@ -162,11 +179,12 @@ public class EmojiPopOver extends PopOver {
 
             setTop(createHeader());
             setCenter(scrollPane);
-            setBottom(createHoverPanel());
+            setBottom(createFootPanel());
             getStyleClass().add("emoji-panel");
             
             loadEmojis(category);
             categoryProperty().addListener((observable, oldValue, newValue) -> loadEmojis(newValue));
+            skinToneProperty().addListener((observable, oldValue, newValue) -> loadEmojis(getCategory()));
         }
 
         private VBox createHeader() {
@@ -236,17 +254,52 @@ public class EmojiPopOver extends PopOver {
         }
 
         private StackPane createEmoji(Emoji emoji) {
-            final ImageView imageView = EmojiImageUtils.emojiView(emoji, 20);
+            final Emoji emojiWithTone = (emoji.getSkin_variations() != null && getSkinTone() != EmojiSkinTone.NO_SKIN_TONE) ?
+                    emoji.getSkin_variations().getOrDefault(getSkinTone().getUnicode(), emoji) :
+                    emoji;
+            final ImageView imageView = EmojiImageUtils.emojiView(emojiWithTone, 20);
             final StackPane emojiContainer = new StackPane(imageView);
             emojiContainer.getStyleClass().add("emoji");
             emojiContainer.addEventHandler(MouseEvent.MOUSE_ENTERED, e -> focusedEmoji.set(emoji));
             emojiContainer.addEventHandler(MouseEvent.MOUSE_EXITED, e -> focusedEmoji.set(null));
             emojiContainer.addEventFilter(MouseEvent.MOUSE_PRESSED, e -> {
                 if (getOnAction() != null) {
-                    getOnAction().handle(new ActionEvent(emoji, this));
+                    getOnAction().handle(new ActionEvent(emojiWithTone, this));
                 }
             });
             return emojiContainer;
+        }
+
+        private HBox createFootPanel() {
+            final HBox box = new HBox();
+            box.getStyleClass().add("foot-box");
+            box.getChildren().add(createHoverPanel());
+            final Pane pane = new Pane();
+            pane.setPrefWidth(10);
+            pane.setPrefHeight(10);
+            HBox.setHgrow(pane, Priority.SOMETIMES);
+            box.getChildren().add(pane);
+            MenuButton menuButton = new MenuButton();
+            menuButton.getStyleClass().add("skin-button");
+            menuButton.graphicProperty().bind(Bindings.createObjectBinding(() -> getSkinTone().getImageView(), skinToneProperty()));
+            Stream.of(EmojiSkinTone.values()).forEach(tone -> {
+                RadioMenuItem toneMenuItem = new RadioMenuItem(null, tone.getImageView());
+                toneMenuItem.getProperties().put("skinTone", tone.getUnicode());
+                toneMenuItem.setToggleGroup(skinToneToogleGroup);
+                toneMenuItem.setOnAction(e -> setSkinTone(tone));
+                menuButton.getItems().add(toneMenuItem);
+            });
+            menuButton.setOnShowing(e -> {
+                if (getSkinTone() != null) {
+                    menuButton.getItems().stream()
+                            .filter(item -> item.getProperties().get("skinTone").equals(getSkinTone().getUnicode()))
+                            .findFirst()
+                            .ifPresent(item -> ((RadioMenuItem) item).setSelected(true));
+                }
+            });
+
+            box.getChildren().add(menuButton);
+            return box;
         }
 
         private Node createHoverPanel() {
@@ -268,7 +321,10 @@ public class EmojiPopOver extends PopOver {
                     emojiName.setText("");
                     emojiShortName.setText("");
                 } else {
-                    emojiPane.getChildren().add(EmojiImageUtils.emojiView(nv, 32));
+                    final Emoji emojiWithTone = (nv.getSkin_variations() != null && getSkinTone() != EmojiSkinTone.NO_SKIN_TONE) ?
+                            nv.getSkin_variations().getOrDefault(getSkinTone().getUnicode(), nv) :
+                            nv;
+                    emojiPane.getChildren().add(EmojiImageUtils.emojiView(emojiWithTone, 32));
                     emojiName.setText(nv.getShort_name().orElse(""));
                     emojiShortName.setText(nv.getCodeName());
                 }
