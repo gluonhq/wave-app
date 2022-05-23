@@ -3,6 +3,8 @@ package com.gluonhq.emoji.popup;
 import com.gluonhq.emoji.util.TextUtils;
 import javafx.scene.Node;
 
+import java.util.stream.Stream;
+
 public enum EmojiSkinTone {
 
     NO_SKIN_TONE("\u270b", ""),
@@ -30,5 +32,12 @@ public enum EmojiSkinTone {
 
     public Node getImageView() {
         return TextUtils.convertToTextAndImageNodes(text).get(0);
+    }
+
+    public static EmojiSkinTone fromUnicode(String unicode) {
+        return Stream.of(values())
+                .filter(emojiSkinTone -> emojiSkinTone.unicode.equals(unicode))
+                .findFirst()
+                .orElse(NO_SKIN_TONE);
     }
 }
