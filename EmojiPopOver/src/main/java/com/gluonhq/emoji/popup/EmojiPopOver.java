@@ -1,14 +1,18 @@
 package com.gluonhq.emoji.popup;
 
+import com.gluonhq.emoji.Emoji;
+import com.gluonhq.emoji.EmojiData;
+import com.gluonhq.emoji.util.EmojiImageUtils;
 import javafx.beans.binding.Bindings;
 import javafx.beans.property.ObjectProperty;
 import javafx.beans.property.SimpleObjectProperty;
+import javafx.css.PseudoClass;
 import javafx.event.ActionEvent;
 import javafx.event.EventHandler;
+import javafx.geometry.Bounds;
 import javafx.scene.Node;
+import javafx.scene.control.Button;
 import javafx.scene.control.Label;
-import javafx.scene.control.MenuButton;
-import javafx.scene.control.RadioMenuItem;
 import javafx.scene.control.ScrollPane;
 import javafx.scene.control.TextField;
 import javafx.scene.control.ToggleButton;
@@ -24,13 +28,12 @@ import javafx.scene.layout.Priority;
 import javafx.scene.layout.Region;
 import javafx.scene.layout.StackPane;
 import javafx.scene.layout.VBox;
+import javafx.stage.Popup;
 import javafx.util.Duration;
 import org.controlsfx.control.PopOver;
 import org.controlsfx.control.textfield.CustomTextField;
 import org.controlsfx.glyphfont.FontAwesome;
-import com.gluonhq.emoji.Emoji;
-import com.gluonhq.emoji.EmojiData;
-import com.gluonhq.emoji.util.EmojiImageUtils;
+
 import java.util.List;
 import java.util.Locale;
 import java.util.ResourceBundle;
@@ -279,26 +282,13 @@ public class EmojiPopOver extends PopOver {
             pane.setPrefHeight(10);
             HBox.setHgrow(pane, Priority.SOMETIMES);
             box.getChildren().add(pane);
-            MenuButton menuButton = new MenuButton();
-            menuButton.getStyleClass().add("skin-button");
-            menuButton.graphicProperty().bind(Bindings.createObjectBinding(() -> getSkinTone().getImageView(), skinToneProperty()));
-            Stream.of(EmojiSkinTone.values()).forEach(tone -> {
-                RadioMenuItem toneMenuItem = new RadioMenuItem(null, tone.getImageView());
-                toneMenuItem.getProperties().put("skinTone", tone.getUnicode());
-                toneMenuItem.setToggleGroup(skinToneToogleGroup);
-                toneMenuItem.setOnAction(e -> setSkinTone(tone));
-                menuButton.getItems().add(toneMenuItem);
-            });
-            menuButton.setOnShowing(e -> {
-                if (getSkinTone() != null) {
-                    menuButton.getItems().stream()
-                            .filter(item -> item.getProperties().get("skinTone").equals(getSkinTone().getUnicode()))
-                            .findFirst()
-                            .ifPresent(item -> ((RadioMenuItem) item).setSelected(true));
-                }
-            });
 
-            box.getChildren().add(menuButton);
+            Button skinButton = new Button();
+            skinButton.getStyleClass().setAll("skin-button");
+            skinButton.graphicProperty().bind(Bindings.createObjectBinding(() -> getSkinTone().getImageView(), skinToneProperty()));
+            skinButton.setOnAction(a -> showSkinsPopup(skinButton));
+
+            box.getChildren().add(skinButton);
             return box;
         }
 
@@ -330,6 +320,37 @@ public class EmojiPopOver extends PopOver {
                 }
             });
             return hoverPanel;
+        }
+
+        private void showSkinsPopup(Button skinButton) {
+            final Popup popup = new Popup();
+            popup.setAutoFix(true);
+            popup.setAutoHide(true);
+            popup.setHideOnEscape(true);
+
+            HBox content = new HBox();
+            content.getStylesheets().addAll(skinButton.getScene().getStylesheets());
+            content.getStylesheets().add(EmojiPopOver.class.getResource("emoji-popover.css").toExternalForm());
+            content.getStyleClass().add("popup-box");
+            content.setPrefHeight(skinButton.getHeight());
+            Stream.of(EmojiSkinTone.values())
+                    .forEach(tone -> {
+                        Button item = new Button(null, tone.getImageView());
+                        item.getStyleClass().setAll("item");
+                        if (getSkinTone().getUnicode().equals(tone.getUnicode())) {
+                            item.pseudoClassStateChanged(PseudoClass.getPseudoClass("selected"), true);
+                        }
+                        item.setOnAction(e -> {
+                            setSkinTone(tone);
+                            popup.hide();
+                        });
+                        content.getChildren().add(item);
+                    });
+            popup.getContent().add(content);
+            Bounds point2D = skinButton.localToScreen(skinButton.getLayoutBounds());
+            content.layout();
+            content.applyCss();
+            popup.show(skinButton, point2D.getMaxX() - content.prefWidth(-1), point2D.getMinY());
         }
         
         private Emoji noEmojiFound() {

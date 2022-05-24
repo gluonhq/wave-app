@@ -195,21 +195,31 @@
 
 .foot-box > .skin-button {
     -fx-background-color: white;
+    -fx-background-radius: 10px;
+    -fx-padding: 4;
+    -fx-alignment: CENTER;
 }
 
-.foot-box > .skin-button > .arrow-button {
-    visibility: hidden;
-}
-
-.foot-box > .skin-button:hover {
+.foot-box > .skin-button:hover  {
     -fx-background-color: rgba(150, 200, 200, 0.25);
-    -fx-background-radius: 0.75em;
 }
 
-.foot-box > .skin-button:hover > .arrow-button {
-    visibility: visible;
+.popup-box {
+    -fx-alignment: center;
+    -fx-spacing: 1;
 }
 
-.foot-box > .skin-button:openvertically .menu-item:focused {
-    -fx-selection-bar: rgba(150, 200, 200, 0.25);
+.popup-box > .item {
+    -fx-background-color: white;
+    -fx-background-radius: 10px;
+    -fx-padding: 4;
+    -fx-alignment: CENTER;
+}
+
+.popup-box > .item:selected {
+    -fx-background-color: rgba(150, 200, 200, 0.5);
+}
+
+.popup-box > .item:hover {
+    -fx-background-color: rgba(150, 200, 200, 0.25);
 }
