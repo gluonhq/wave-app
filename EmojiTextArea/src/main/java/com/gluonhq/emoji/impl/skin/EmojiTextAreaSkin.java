@@ -476,10 +476,14 @@ public class EmojiTextAreaSkin extends SkinBase<EmojiTextArea> {
                         e.consume();
                     } else if (OPTION_RIGHT_KEY_COMBINATION.match(e) || SHIFT_OPTION_RIGHT_KEY_COMBINATION.match(e) ) {
                         int caretPosition = textarea.getCaretPosition();
+                        if (caretPosition == textarea.getText().length()) return;
                         if (textarea.getText().charAt(caretPosition) == ' ') {
                             caretPosition++;
                         }
                         int indexOfNextWhitespace = textarea.getText().indexOf(" ", caretPosition);
+                        if (indexOfNextWhitespace == -1) {
+                            indexOfNextWhitespace = textarea.getText().length();
+                        }
                         textarea.moveTo(indexOfNextWhitespace, e.isShiftDown() ? SelectionPolicy.ADJUST : SelectionPolicy.CLEAR);
                         e.consume();
                     } else if (OPTION_LEFT_KEY_COMBINATION.match(e) || SHIFT_OPTION_LEFT_KEY_COMBINATION.match(e)) {
