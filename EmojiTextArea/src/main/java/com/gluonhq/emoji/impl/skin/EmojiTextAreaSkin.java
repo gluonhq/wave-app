@@ -470,20 +470,26 @@ public class EmojiTextAreaSkin extends SkinBase<EmojiTextArea> {
                         textarea.moveTo(0);
                         e.consume();
                     } else if (OPTION_DEL_KEY_COMBINATION.match(e)) {
-                        String text = textarea.getText().trim();
-                        int indexOf = Math.max(text.lastIndexOf(" "), 0);
-                        updateTextArea(text.substring(0, indexOf));
+                        int caretPosition = getCaretPosition();
+                        String text = textarea.getText().substring(0, caretPosition).trim();
+                        int indexOf = Math.max(text.lastIndexOf(" ") + 1, 0);
+                        updateTextArea(text.substring(0, indexOf) + textarea.getText().substring(caretPosition));
+                        textarea.moveTo(indexOf, SelectionPolicy.CLEAR);
                         e.consume();
                     } else if (OPTION_RIGHT_KEY_COMBINATION.match(e) || SHIFT_OPTION_RIGHT_KEY_COMBINATION.match(e) ) {
-                        int caretPosition = textarea.getCaretPosition();
+                        int caretPosition = getCaretPosition();
+                        if (caretPosition == textarea.getText().length()) return;
                         if (textarea.getText().charAt(caretPosition) == ' ') {
                             caretPosition++;
                         }
                         int indexOfNextWhitespace = textarea.getText().indexOf(" ", caretPosition);
+                        if (indexOfNextWhitespace == -1) {
+                            indexOfNextWhitespace = textarea.getText().length();
+                        }
                         textarea.moveTo(indexOfNextWhitespace, e.isShiftDown() ? SelectionPolicy.ADJUST : SelectionPolicy.CLEAR);
                         e.consume();
                     } else if (OPTION_LEFT_KEY_COMBINATION.match(e) || SHIFT_OPTION_LEFT_KEY_COMBINATION.match(e)) {
-                        final int caretPosition = textarea.getCaretPosition();
+                        final int caretPosition = getCaretPosition();
                         String substring = textarea.getText().substring(0, caretPosition).trim();
                         int indexOfPreviousWhitespace = substring.lastIndexOf(" ") + 1;
                         textarea.moveTo(indexOfPreviousWhitespace, e.isShiftDown() ? SelectionPolicy.ADJUST : SelectionPolicy.CLEAR);
