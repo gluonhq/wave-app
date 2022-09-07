@@ -7,7 +7,7 @@
     <parent>
         <groupId>com.gluonhq.chatapp</groupId>
         <artifactId>chatapp</artifactId>
-        <version>1.1.11</version>
+        <version>1.1.12-SNAPSHOT</version>
     </parent>
 
     <properties>
@@ -24,14 +24,6 @@
                     <release>11</release>
                     <compilerArgs>
                         <arg>--add-opens</arg>
-                        <arg>javafx.graphics/javafx.scene.text=richtextfx</arg>
-                        <arg>--add-opens</arg>
-                        <arg>javafx.graphics/com.sun.javafx.text=richtextfx</arg>
-                        <arg>--add-opens</arg>
-                        <arg>javafx.graphics/com.sun.javafx.scene.text=richtextfx</arg>
-                        <arg>--add-opens</arg>
-                        <arg>javafx.graphics/com.sun.javafx.geom=richtextfx</arg>
-                        <arg>--add-opens</arg>
                         <arg>javafx.graphics/com.sun.javafx.css=org.controlsfx.controls</arg>
                     </compilerArgs>
                 </configuration>
@@ -42,14 +34,6 @@
                 <version>${javafx-maven-plugin-version}</version>
                 <configuration>
                     <options>
-                        <arg>--add-opens</arg>
-                        <arg>javafx.graphics/javafx.scene.text=richtextfx</arg>
-                        <arg>--add-opens</arg>
-                        <arg>javafx.graphics/com.sun.javafx.text=richtextfx</arg>
-                        <arg>--add-opens</arg>
-                        <arg>javafx.graphics/com.sun.javafx.scene.text=richtextfx</arg>
-                        <arg>--add-opens</arg>
-                        <arg>javafx.graphics/com.sun.javafx.geom=richtextfx</arg>
                         <arg>--add-opens</arg>
                         <arg>javafx.graphics/com.sun.javafx.css=org.controlsfx.controls</arg>
                     </options>
@@ -69,14 +53,6 @@
                         <configuration>
                             <options>
                                 <arg>--add-opens</arg>
-                                <arg>javafx.graphics/javafx.scene.text=richtextfx</arg>
-                                <arg>--add-opens</arg>
-                                <arg>javafx.graphics/com.sun.javafx.text=richtextfx</arg>
-                                <arg>--add-opens</arg>
-                                <arg>javafx.graphics/com.sun.javafx.scene.text=richtextfx</arg>
-                                <arg>--add-opens</arg>
-                                <arg>javafx.graphics/com.sun.javafx.geom=richtextfx</arg>
-                                <arg>--add-opens</arg>
                                 <arg>javafx.graphics/com.sun.javafx.css=org.controlsfx.controls</arg>
                                 <option>-agentlib:jdwp=transport=dt_socket,server=y,suspend=y,address=*:8000</option>
                             </options>
@@ -92,12 +68,12 @@
         <dependency>
             <groupId>com.gluonhq.chatapp</groupId>
             <artifactId>EmojiData</artifactId>
-            <version>1.1.11</version>
+            <version>1.1.12-SNAPSHOT</version>
         </dependency>
         <dependency>
             <groupId>com.gluonhq.chatapp</groupId>
             <artifactId>EmojiPopOver</artifactId>
-            <version>1.1.11</version>
+            <version>1.1.12-SNAPSHOT</version>
         </dependency>
         <dependency>
             <groupId>org.controlsfx</groupId>
@@ -113,7 +89,7 @@
         <dependency>
             <groupId>org.fxmisc.richtext</groupId>
             <artifactId>richtextfx</artifactId>
-            <version>1.0.2-gluon</version>
+            <version>0.10.9</version>
             <exclusions>
                 <exclusion>
                     <groupId>org.openjfx</groupId>

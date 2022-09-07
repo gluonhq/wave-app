@@ -9,12 +9,25 @@ import com.gluonhq.emoji.util.TextUtils;
 import javafx.application.Platform;
 import javafx.beans.property.BooleanProperty;
 import javafx.beans.property.SimpleBooleanProperty;
-import javafx.css.*;
+import javafx.css.CssMetaData;
+import javafx.css.SimpleStyleableDoubleProperty;
+import javafx.css.Styleable;
+import javafx.css.StyleableDoubleProperty;
+import javafx.css.StyleableProperty;
 import javafx.css.converter.SizeConverter;
 import javafx.event.ActionEvent;
 import javafx.scene.Node;
-import javafx.scene.control.*;
-import javafx.scene.input.*;
+import javafx.scene.control.Button;
+import javafx.scene.control.ContentDisplay;
+import javafx.scene.control.Control;
+import javafx.scene.control.IndexRange;
+import javafx.scene.control.SkinBase;
+import javafx.scene.input.Clipboard;
+import javafx.scene.input.KeyCode;
+import javafx.scene.input.KeyCodeCombination;
+import javafx.scene.input.KeyCombination;
+import javafx.scene.input.KeyEvent;
+import javafx.scene.input.MouseEvent;
 import javafx.scene.layout.Region;
 import javafx.scene.paint.Color;
 import org.controlsfx.control.PopOver;
@@ -195,6 +208,10 @@ public class EmojiTextAreaSkin extends SkinBase<EmojiTextArea> {
 
     }
 
+    public EmojiStyledTextArea getTextarea() {
+        return textarea;
+    }
+
     private void updateTextArea(String text) {
         textarea.clear();
         TextUtils.convertToStringAndEmojiObjects(text).forEach(o -> {
@@ -352,7 +369,7 @@ public class EmojiTextAreaSkin extends SkinBase<EmojiTextArea> {
      *                                                                         *
      **************************************************************************/
 
-    private class EmojiStyledTextArea extends GenericStyledArea<ParStyle, Either<String, LinkedEmoji>, TextStyle> {
+    public class EmojiStyledTextArea extends GenericStyledArea<ParStyle, Either<String, LinkedEmoji>, TextStyle> {
 
         private static final int LINE_SIZE = 22;
         private static final int MIN_WIDTH = 250;
@@ -420,7 +437,7 @@ public class EmojiTextAreaSkin extends SkinBase<EmojiTextArea> {
         protected double computeMinWidth(double height) {
             return snappedLeftInset() + MIN_WIDTH + snappedRightInset();
         }
-        
+
         @Override
         protected double computePrefHeight(double width) {
             if (!getChildren().isEmpty() && getChildren().get(0) instanceof VirtualFlow) {
