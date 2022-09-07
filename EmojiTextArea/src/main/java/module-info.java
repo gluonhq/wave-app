@@ -5,8 +5,8 @@ module com.gluonhq.emoji.control {
 //    requires com.gluonhq.attach.keyboard;
     requires org.controlsfx.controls;
     requires reactfx;
-    requires richtextfx;
-    requires flowless;
+    requires org.fxmisc.richtext;
+    requires org.fxmisc.flowless;
     requires java.json;
 
     exports com.gluonhq.emoji.control;
