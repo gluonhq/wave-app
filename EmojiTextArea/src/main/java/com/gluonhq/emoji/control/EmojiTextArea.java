@@ -106,10 +106,12 @@ public class EmojiTextArea extends Control {
     }
 
     public void insertText(int position, String text) {
+        if (textarea == null) return;
         textarea.insertText(position, text);
     }
 
     public void replaceText(IndexRange range, String text) {
+        if (textarea == null) return;
         final int start = range.getStart();
         final int end = start + range.getLength();
         textarea.replaceText(start, end, text);
@@ -119,7 +121,9 @@ public class EmojiTextArea extends Control {
     protected Skin<?> createDefaultSkin() {
         EmojiTextAreaSkin emojiTextAreaSkin = new EmojiTextAreaSkin(this);
         textarea = emojiTextAreaSkin.getTextarea();
-        caretPosition.bind(textarea.caretPositionProperty());
+        if (textarea != null) {
+            caretPosition.bind(textarea.caretPositionProperty());
+        }
         return emojiTextAreaSkin;
     }
 
