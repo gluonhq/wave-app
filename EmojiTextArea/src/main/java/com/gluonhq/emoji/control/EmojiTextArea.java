@@ -86,21 +86,6 @@ public class EmojiTextArea extends Control {
         onAction.set(value);
     }
 
-    // consumerActionProperty
-    private final ObjectProperty<Consumer<String>> consumerActionProperty = new SimpleObjectProperty<>(this, "consumerAction");
-
-    public final ObjectProperty<Consumer<String>> consumerActionProperty() {
-        return consumerActionProperty;
-    }
-
-    public final Consumer<String> getConsumerAction() {
-        return consumerActionProperty.get();
-    }
-
-    public final void setConsumerAction(Consumer<String> value) {
-        consumerActionProperty.set(value);
-    }
-
     /**
      * The current position of the caret within the text.
      * The <code>anchor</code> and <code>caretPosition</code> make up the selection
