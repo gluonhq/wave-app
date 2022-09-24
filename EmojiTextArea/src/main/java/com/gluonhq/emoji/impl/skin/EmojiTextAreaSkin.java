@@ -78,7 +78,7 @@ public class EmojiTextAreaSkin extends SkinBase<EmojiTextArea> {
 
         super(control);
         textarea = new EmojiStyledTextArea();
-        // textarea.appendText(control.getText());
+        updateTextArea(control.getText());
         textarea.setWrapText(true);
         virtualizedScrollPane = new VirtualizedScrollPane<>(textarea) {
             @Override
@@ -214,6 +214,7 @@ public class EmojiTextAreaSkin extends SkinBase<EmojiTextArea> {
 
     private void updateTextArea(String text) {
         textarea.clear();
+        if (text == null) return; // clear the textarea when null is passed?
         TextUtils.convertToStringAndEmojiObjects(text).forEach(o -> {
             if (o instanceof String) {
                 textarea.appendText((String) o);
@@ -248,7 +249,7 @@ public class EmojiTextAreaSkin extends SkinBase<EmojiTextArea> {
 
         emojiButton.resizeRelocate(
                 getSkinnable().getEmojiSide() == LEFT ? contentX : contentX + contentWidth - buttonWidth,
-                contentHeight + snappedTopInset() - buttonHeight, 
+                snappedTopInset(),
                 buttonWidth,
                 buttonHeight
         );
