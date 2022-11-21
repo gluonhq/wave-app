@@ -1,7 +1,6 @@
 package com.gluonhq.emoji.impl.skin;
 
 import com.gluonhq.emoji.Emoji;
-import com.gluonhq.emoji.EmojiData;
 import javafx.scene.Node;
 
 import java.util.Optional;
@@ -15,8 +14,12 @@ public class EmptyLinkedEmoji implements LinkedEmoji {
 
     @Override
     public Optional<Emoji> getEmoji() {
-        // Dummy, will never be called
-        return EmojiData.emojiFromShortName("smile");
+        return Optional.empty();
+    }
+
+    @Override
+    public String getEmojiData() {
+        return "";
     }
 
     @Override

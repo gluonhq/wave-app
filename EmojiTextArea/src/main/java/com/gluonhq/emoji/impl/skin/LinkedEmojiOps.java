@@ -14,9 +14,4 @@ public class LinkedEmojiOps<S> extends NodeSegmentOpsBase<LinkedEmoji, S> {
         return emoji.isReal() ? 1 : 0;
     }
 
-    @Override
-    public String realGetText(LinkedEmoji linkedEmoji) {
-        return linkedEmoji.isReal() ? linkedEmoji.getEmoji().get().character() : "";
-    }
-
 }

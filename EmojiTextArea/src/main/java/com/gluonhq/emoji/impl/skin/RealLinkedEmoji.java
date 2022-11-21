@@ -36,6 +36,11 @@ public class RealLinkedEmoji implements LinkedEmoji {
     }
 
     @Override
+    public String getEmojiData() {
+        return emoji.getUnified();
+    }
+
+    @Override
     public String toString() {
         return "RealLinkedEmoji:"+ emoji.toString();
     }
