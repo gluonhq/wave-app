@@ -23,36 +23,34 @@ import javafx.scene.control.Control;
 import javafx.scene.control.IndexRange;
 import javafx.scene.control.SkinBase;
 import javafx.scene.input.Clipboard;
+import javafx.scene.input.DataFormat;
 import javafx.scene.input.KeyCode;
 import javafx.scene.input.KeyCodeCombination;
 import javafx.scene.input.KeyCombination;
 import javafx.scene.input.KeyEvent;
 import javafx.scene.input.MouseEvent;
 import javafx.scene.layout.Region;
-import javafx.scene.paint.Color;
 import org.controlsfx.control.PopOver;
-import org.fxmisc.flowless.VirtualFlow;
 import org.fxmisc.flowless.VirtualizedScrollPane;
 import org.fxmisc.richtext.GenericStyledArea;
 import org.fxmisc.richtext.StyledTextArea;
 import org.fxmisc.richtext.TextExt;
-import org.fxmisc.richtext.model.Paragraph;
+import org.fxmisc.richtext.model.Codec;
 import org.fxmisc.richtext.model.ReadOnlyStyledDocument;
 import org.fxmisc.richtext.model.SegmentOps;
+import org.fxmisc.richtext.model.StyledDocument;
 import org.fxmisc.richtext.model.StyledSegment;
+import org.fxmisc.richtext.util.UndoUtils;
 import org.reactfx.util.Either;
 import org.reactfx.value.Val;
 import org.reactfx.value.Var;
 
-import java.lang.reflect.InvocationTargetException;
-import java.lang.reflect.Method;
 import java.text.BreakIterator;
 import java.time.Duration;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
-import java.util.concurrent.atomic.AtomicInteger;
 import java.util.function.BiConsumer;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -67,7 +65,7 @@ public class EmojiTextAreaSkin extends SkinBase<EmojiTextArea> {
     private final EmojiStyledTextArea textarea;
     private final VirtualizedScrollPane<EmojiStyledTextArea> virtualizedScrollPane;
 
-    private StyleableDoubleProperty spacing = new SimpleStyleableDoubleProperty(SPACING, this, "spacing", 0.0);
+    private final StyleableDoubleProperty spacing = new SimpleStyleableDoubleProperty(SPACING, this, "spacing", 0.0);
 
     /**
      * Constructor for all SkinBase instances.
@@ -75,7 +73,6 @@ public class EmojiTextAreaSkin extends SkinBase<EmojiTextArea> {
      * @param control The control for which this Skin should attach to.
      */
     public EmojiTextAreaSkin(EmojiTextArea control) {
-
         super(control);
         textarea = new EmojiStyledTextArea();
         updateTextArea(control.getText());
@@ -135,43 +132,17 @@ public class EmojiTextAreaSkin extends SkinBase<EmojiTextArea> {
 
         spacing.addListener(o -> control.requestLayout());
 
-        // The default textarea.paste() behavior adds the text to the textarea,
-        // and then we need to update it again to replace the emojis, which is inconvenient.
-        // Instead, we overrule that behavior to add the text directly to the control,
-        // which will in turn call updateTextArea.
-        textarea.addEventFilter(KeyEvent.KEY_PRESSED, e -> {
-            if ((e.getCode() == KeyCode.V && e.isShortcutDown()) ||
-                    (e.getCode() == KeyCode.INSERT && e.isShiftDown()) ||
-                    e.getCode() == KeyCode.PASTE) {
-                    e.consume();
-                Clipboard clipboard = Clipboard.getSystemClipboard();
-                if (clipboard.hasString()) {
-                    IndexRange selection = textarea.getSelection();
-                    int caretPosition = textarea.getCaretPosition();
-                    String leftText = textarea.getText(0, selection != null ? selection.getStart() : caretPosition);
-                    String rightText = "";
-                    int to = selection != null ? selection.getEnd() : caretPosition;
-                    if (to < textarea.getLength()) {
-                        rightText = textarea.getText(to, textarea.getLength());
-                    }
-                    control.setText(leftText + clipboard.getString() + rightText);
-                }
-            }
-        });
-
         BooleanProperty isReplacing = new SimpleBooleanProperty();
-        textarea.textProperty().addListener((obs, ov, nv) -> {
+        textarea.multiRichChanges().successionEnds(Duration.ofMillis(100)).subscribe(change -> {
             if (!isReplacing.get()) {
                 isReplacing.set(true);
-//                System.out.println("skin Replacing text :::" + ov + "::: with ::" + nv + "::");
-                control.setText(nv);
+                control.setText(textarea.getContentAsText());
                 isReplacing.set(false);
             }
         });
         control.textProperty().addListener((obs, ov, nv) -> {
             if (!isReplacing.get()) {
                 isReplacing.set(true);
-//                System.out.println("Replace text :::" + nv + "::: from ::" + ov + "::");
                 updateTextArea(nv);
                 isReplacing.set(false);
             }
@@ -225,12 +196,9 @@ public class EmojiTextAreaSkin extends SkinBase<EmojiTextArea> {
     }
 
     private ReadOnlyStyledDocument<ParStyle, Either<String, LinkedEmoji>, TextStyle> getStyledDocumentFromEmoji(Emoji emoji) {
-        final RealLinkedEmoji realLinkedEmoji = new RealLinkedEmoji(emoji);
         return ReadOnlyStyledDocument.fromSegment(
-                        Either.right(realLinkedEmoji),
-                        ParStyle.EMPTY,
-                        TextStyle.EMPTY,
-                        textarea.getSegOps());
+                        Either.right(new RealLinkedEmoji(emoji)),
+                        ParStyle.EMPTY, TextStyle.EMPTY, textarea.getSegOps());
     }
 
     private void updateSide() {
@@ -309,7 +277,7 @@ public class EmojiTextAreaSkin extends SkinBase<EmojiTextArea> {
     private IndexRange findWordIndexAtCaret() {
         final int caretPosition = textarea.getCaretPosition();
         Pattern pattern = Pattern.compile("\\S+");
-        Matcher matcher = pattern.matcher(textarea.createEmojiText());
+        Matcher matcher = pattern.matcher(textarea.getText());
         while (matcher.find()) {
             if (matcher.start() <= caretPosition && matcher.end() >= caretPosition) {
                 return new IndexRange(matcher.start(), matcher.end());
@@ -331,7 +299,7 @@ public class EmojiTextAreaSkin extends SkinBase<EmojiTextArea> {
                 @Override
                 public boolean isSettable(EmojiTextArea node) {
                     final EmojiTextAreaSkin skin = (EmojiTextAreaSkin) node.getSkin();
-                    return skin.spacing == null || !skin.spacing.isBound();
+                    return !skin.spacing.isBound();
                 }
 
                 @Override
@@ -386,6 +354,8 @@ public class EmojiTextAreaSkin extends SkinBase<EmojiTextArea> {
         private final KeyCodeCombination COMMAND_LEFT_KEY_COMBINATION = new KeyCodeCombination(KeyCode.LEFT, KeyCombination.SHORTCUT_DOWN);
         private final KeyCodeCombination SHIFT_COMMAND_LEFT_KEY_COMBINATION = new KeyCodeCombination(KeyCode.LEFT, KeyCombination.SHORTCUT_DOWN, KeyCombination.SHIFT_DOWN);
 
+        private final DataFormat richDataFormat;
+
         EmojiStyledTextArea() {
             super(ParStyle.EMPTY,
                     (paragraph, style) -> paragraph.setStyle(style.toCss()),
@@ -393,45 +363,16 @@ public class EmojiTextAreaSkin extends SkinBase<EmojiTextArea> {
                     SegmentOps.<TextStyle>styledTextOps()._or(new LinkedEmojiOps<>(), (s1, s2) -> Optional.empty()),
                     seg -> createNode(seg, (text, style) -> text.setStyle(style.toCss())));
 
-            multiRichChanges()
-                .successionEnds(Duration.ofMillis(100))
-                .subscribe(change -> {
-                    Pattern pattern = Pattern.compile(":[\\w-]*:");
-                    Matcher matcher = pattern.matcher(createEmojiText());
-                    // Using AtomicInteger to avoid creating another variable for final
-                    AtomicInteger diff = new AtomicInteger(0);
-                    while (matcher.find()) {
-                        final int caretPosition = getCaretPosition();
-                        if (matcher.start() <= caretPosition && matcher.end() >= caretPosition) {
-                            EmojiData.emojiFromCodeName(matcher.group()).ifPresent(emoji -> {
-                                final int startIndex = matcher.start() - diff.get();
-                                final int endIndex = matcher.end() - diff.get();
-                                final int rosLength = replace(startIndex, endIndex, emoji);
-                                diff.addAndGet(matcher.end() - matcher.start() - rosLength);
-                            });
-                        }
-                    }
-                });
-
-            // selection text should be white
-            selectionProperty().addListener((observable, oldValue, newValue) -> {
-                // When a text is converted to emoji, the old value contains
-                // the old length which can cause IndexOutOfBoundsException
-                if (inRange(oldValue)) {
-                    setStyle(oldValue.getStart(), oldValue.getEnd(), TextStyle.textColor(Color.BLACK));
-                }
-                // Do not add white for new paragraphs
-                // inRange check is required to avoid IndexOutOfBoundException when a user
-                // double click at the end of a sentence
-                if (inRange(newValue) && newValue.getStart() != newValue.getEnd()) {
-                    setStyle(newValue.getStart(), newValue.getEnd(), TextStyle.textColor(Color.WHITE));
-                }
-                // Make sure to revert back to BLACK when the TextArea is cleared
-                if (newValue.equals(GenericStyledArea.EMPTY_RANGE)) {
-                    setStyle(0, 0, TextStyle.textColor(Color.BLACK));
-                }
-            });
             addBehaviorChanges();
+
+            Codec<StyledSegment<Either<String, LinkedEmoji>, TextStyle>> styledSegCodec = Codec.styledSegmentCodec(Codec.eitherCodec(Codec.STRING_CODEC, LinkedEmoji.EMOJI_CODEC), TextStyle.CODEC);
+            setStyleCodecs(ParStyle.CODEC, styledSegCodec);
+
+            Codec<StyledDocument<ParStyle, Either<String, LinkedEmoji>, TextStyle>> codec = ReadOnlyStyledDocument.codec(ParStyle.CODEC, styledSegCodec, getSegOps());
+            richDataFormat = DataFormat.lookupMimeType(codec.getName()) != null ?
+                    DataFormat.lookupMimeType(codec.getName()) : new DataFormat(codec.getName());
+
+            setUndoManager(UndoUtils.richTextUndoManager(this));
         }
 
         @Override
@@ -441,16 +382,12 @@ public class EmojiTextAreaSkin extends SkinBase<EmojiTextArea> {
 
         @Override
         protected double computePrefHeight(double width) {
-            if (!getChildren().isEmpty() && getChildren().get(0) instanceof VirtualFlow) {
-                final VirtualFlow virtualFlow = (VirtualFlow) getChildren().get(0);
-                int noOfLines = 0;
-                int paragraphIndex = 0;
-                while (paragraphIndex < getParagraphs().size()) {
-                    noOfLines += (Integer) invoke(mGetLineCount, virtualFlow.getCell(paragraphIndex++).getNode());
-                }
-                return snappedTopInset() + noOfLines * LINE_SIZE + snappedTopInset();
+            int noOfLines = 0;
+            int paragraphIndex = 0;
+            while (paragraphIndex < getParagraphs().size()) {
+                noOfLines += getParagraphLinesCount(paragraphIndex++);
             }
-            return snappedTopInset() + getParagraphs().size() * LINE_SIZE + snappedBottomInset();
+            return snappedTopInset() + noOfLines * LINE_SIZE + snappedBottomInset();
         }
 
         private void addBehaviorChanges() {
@@ -533,52 +470,69 @@ public class EmojiTextAreaSkin extends SkinBase<EmojiTextArea> {
                     e.consume();
                 }
             });
+
+            addEventFilter(KeyEvent.KEY_PRESSED, e -> {
+                if ((e.getCode() == KeyCode.V && e.isShortcutDown()) ||
+                    (e.getCode() == KeyCode.INSERT && e.isShiftDown()) ||
+                    e.getCode() == KeyCode.PASTE) {
+
+                    Clipboard clipboard = Clipboard.getSystemClipboard();
+                    // If clipboard contains richDataFormat, just paste with the built-in action,
+                    // else convert the string into Either<String, LinkedEmoji>
+                    if (!clipboard.hasContent(richDataFormat)) {
+                        e.consume();
+                        if (clipboard.hasString()) {
+                            String text = clipboard.getString();
+                            if (text != null) {
+                                replaceSelection("");
+                                TextUtils.convertToStringAndEmojiObjects(text).forEach(o -> {
+                                    if (o instanceof String) {
+                                        insertText(getCaretPosition(), (String) o);
+                                    } else {
+                                        insert(getCaretPosition(), getStyledDocumentFromEmoji((Emoji) o));
+                                    }
+                                });
+                            }
+                        }
+                    }
+                }
+            });
+
         }
 
         public void selectWord() {
             BreakIterator breakIterator = BreakIterator.getWordInstance();
-            breakIterator.setText(createEmojiText());
+            breakIterator.setText(getText());
 
             int start = calculatePositionViaBreakingBackwards(1, breakIterator, getCaretPosition());
             int end = calculatePositionViaBreakingForwards(1, breakIterator, getCaretPosition());
             selectRange(start, end);
         }
 
-        String createEmojiText() {
+        /**
+         * Export Either<String, LinkedEmoji> as text
+         * @return a string with plain text and/or unicode from emojis
+         */
+        String getContentAsText() {
             StringBuilder text = new StringBuilder();
             for (int index = 0; index < getParagraphs().size(); index++) {
                 if (index > 0) {
                     text.append("\n");
                 }
-                Paragraph<ParStyle, Either<String, LinkedEmoji>, TextStyle> paragraph = getParagraphs().get(index);
-                for (Either<String, LinkedEmoji> segments : paragraph.getSegments()) {
-                    if (segments.isLeft()) {
-                        final String left = segments.getLeft();
-                        text.append(left);
-                    } else if (segments.isRight()) {
-                        text.append("E"); // A dummy character for Emoji
-                    }
-                }
+                getParagraphs().get(index).getSegments().stream()
+                        .map(segment -> segment.isLeft() ? segment.getLeft() :
+                                segment.getRight().getEmoji().map(Emoji::character).orElse(""))
+                        .forEach(text::append);
             }
             return text.toString();
         }
 
         /**
          * Replaces a range with emoji, adds a whitespace after emoji
-         * and return the length of the document replaced
          */
-        int replace(int start, int end, Emoji emoji) {
-            final RealLinkedEmoji realLinkedEmoji = new RealLinkedEmoji(emoji);
-            ReadOnlyStyledDocument<ParStyle, Either<String, LinkedEmoji>, TextStyle> ros =
-                    ReadOnlyStyledDocument.fromSegment(
-                            Either.right(realLinkedEmoji),
-                            ParStyle.EMPTY,
-                            TextStyle.EMPTY,
-                            getSegOps()
-                    );
-            replace(start, end, ros);
+        private void replace(int start, int end, Emoji emoji) {
+            replace(start, end, getStyledDocumentFromEmoji(emoji));
             textarea.insertText(textarea.getCaretPosition(), " ");
-            return ros.length();
         }
 
         private void checkAndShowPopup(KeyEvent e) {
@@ -606,7 +560,7 @@ public class EmojiTextAreaSkin extends SkinBase<EmojiTextArea> {
         // If the index is greater than the length of the string, it will return empty
         private String findEmojiWordAtCaret() {
             Pattern pattern = Pattern.compile(":[\\w-]{3,}");
-            Matcher matcher = pattern.matcher(createEmojiText());
+            Matcher matcher = pattern.matcher(getText());
             while (matcher.find()) {
                 final int caretPosition = getCaretPosition();
                 if (matcher.start() <= caretPosition && matcher.end() >= caretPosition) {
@@ -634,29 +588,5 @@ public class EmojiTextAreaSkin extends SkinBase<EmojiTextArea> {
             return breakIterator.current();
         }
 
-        private boolean inRange(IndexRange indexRange) {
-            final int textWithEmojiLength = createEmojiText().length();
-            return indexRange.getStart() < textWithEmojiLength &&
-                     indexRange.getEnd() < textWithEmojiLength;
-        }
-    }
-
-    private static Method mGetLineCount;
-    static {
-        try {
-            mGetLineCount = Class.forName("org.fxmisc.richtext.ParagraphBox").getDeclaredMethod("getLineCount");
-        } catch (NoSuchMethodException | SecurityException | ClassNotFoundException e) {
-            throw new RuntimeException(e);
-        }
-        mGetLineCount.setAccessible(true);
-    }
-
-    private static Object invoke(Method m, Object obj, Object... args) {
-        try {
-            return m.invoke(obj, args);
-        } catch (IllegalAccessException | IllegalArgumentException
-                | InvocationTargetException e) {
-            throw new RuntimeException(e);
-        }
     }
 }
