@@ -36,6 +36,7 @@ import org.fxmisc.richtext.GenericStyledArea;
 import org.fxmisc.richtext.StyledTextArea;
 import org.fxmisc.richtext.TextExt;
 import org.fxmisc.richtext.model.Codec;
+import org.fxmisc.richtext.model.Paragraph;
 import org.fxmisc.richtext.model.ReadOnlyStyledDocument;
 import org.fxmisc.richtext.model.SegmentOps;
 import org.fxmisc.richtext.model.StyledDocument;
@@ -152,6 +153,8 @@ public class EmojiTextAreaSkin extends SkinBase<EmojiTextArea> {
                 textarea.requestFocus();
             }
         });
+
+        textarea.contextMenuObjectProperty().bind(control.contextMenuProperty());
 
 //        double fontSize = ((Region) textarea.lookup(".styled-text-area")).getChildrenUnmodifiable().stream()
 //                .filter(Text.class::isInstance)
@@ -475,29 +478,12 @@ public class EmojiTextAreaSkin extends SkinBase<EmojiTextArea> {
                 if ((e.getCode() == KeyCode.V && e.isShortcutDown()) ||
                     (e.getCode() == KeyCode.INSERT && e.isShiftDown()) ||
                     e.getCode() == KeyCode.PASTE) {
-
-                    Clipboard clipboard = Clipboard.getSystemClipboard();
-                    // If clipboard contains richDataFormat, just paste with the built-in action,
-                    // else convert the string into Either<String, LinkedEmoji>
-                    if (!clipboard.hasContent(richDataFormat)) {
+                    if (pasteStringAsRichContent()) {
+                        // don't forward event, it was already pasted as rich content
                         e.consume();
-                        if (clipboard.hasString()) {
-                            String text = clipboard.getString();
-                            if (text != null) {
-                                replaceSelection("");
-                                TextUtils.convertToStringAndEmojiObjects(text).forEach(o -> {
-                                    if (o instanceof String) {
-                                        insertText(getCaretPosition(), (String) o);
-                                    } else {
-                                        insert(getCaretPosition(), getStyledDocumentFromEmoji((Emoji) o));
-                                    }
-                                });
-                            }
-                        }
                     }
                 }
             });
-
         }
 
         public void selectWord() {
@@ -514,17 +500,49 @@ public class EmojiTextAreaSkin extends SkinBase<EmojiTextArea> {
          * @return a string with plain text and/or unicode from emojis
          */
         String getContentAsText() {
+            return getContentAsText(getParagraphs());
+        }
+
+        String getSelectedContentAsText() {
+            IndexRange sel = this.getSelection();
+            return getContentAsText(subDocument(sel.getStart(), sel.getEnd()).getParagraphs());
+        }
+
+        private String getContentAsText(List<Paragraph<ParStyle, Either<String, LinkedEmoji>, TextStyle>> paragraphs) {
             StringBuilder text = new StringBuilder();
-            for (int index = 0; index < getParagraphs().size(); index++) {
+            for (int index = 0; index < paragraphs.size(); index++) {
                 if (index > 0) {
                     text.append("\n");
                 }
-                getParagraphs().get(index).getSegments().stream()
+                paragraphs.get(index).getSegments().stream()
                         .map(segment -> segment.isLeft() ? segment.getLeft() :
                                 segment.getRight().getEmoji().map(Emoji::character).orElse(""))
                         .forEach(text::append);
             }
             return text.toString();
+        }
+
+        boolean pasteStringAsRichContent() {
+            Clipboard clipboard = Clipboard.getSystemClipboard();
+            // If clipboard contains richDataFormat, just paste with the built-in action,
+            // else convert the string into Either<String, LinkedEmoji>
+            if (!clipboard.hasContent(richDataFormat)) {
+                if (clipboard.hasString()) {
+                    String text = clipboard.getString();
+                    if (text != null) {
+                        replaceSelection("");
+                        TextUtils.convertToStringAndEmojiObjects(text).forEach(o -> {
+                            if (o instanceof String) {
+                                insertText(getCaretPosition(), (String) o);
+                            } else {
+                                insert(getCaretPosition(), getStyledDocumentFromEmoji((Emoji) o));
+                            }
+                        });
+                    }
+                }
+                return true;
+            }
+            return false;
         }
 
         /**

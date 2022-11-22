@@ -1,5 +1,6 @@
 package com.gluonhq.emoji.control;
 
+import com.gluonhq.emoji.action.ActionFactory;
 import com.gluonhq.emoji.impl.skin.EmojiTextAreaSkin;
 import com.gluonhq.emoji.popup.EmojiSkinTone;
 import javafx.beans.property.ObjectProperty;
@@ -14,11 +15,11 @@ import javafx.scene.control.Control;
 import javafx.scene.control.IndexRange;
 import javafx.scene.control.Skin;
 
-import java.util.function.Consumer;
-
 public class EmojiTextArea extends Control {
 
     private EmojiTextAreaSkin.EmojiStyledTextArea textarea;
+
+    private final ActionFactory actionFactory = new ActionFactory(this);
 
     public EmojiTextArea() {
         getStyleClass().add(DEFAULT_STYLE_CLASS);
@@ -84,6 +85,10 @@ public class EmojiTextArea extends Control {
 
     public final void setOnAction(EventHandler<ActionEvent> value) {
         onAction.set(value);
+    }
+
+    public ActionFactory getActionFactory() {
+        return actionFactory;
     }
 
     /**

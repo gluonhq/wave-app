@@ -7,8 +7,10 @@ module com.gluonhq.emoji.control {
     requires reactfx;
     requires org.fxmisc.richtext;
     requires org.fxmisc.flowless;
+    requires org.fxmisc.undo;
     requires java.json;
 
+    exports com.gluonhq.emoji.action;
     exports com.gluonhq.emoji.control;
     exports com.gluonhq.emoji.event;
     exports com.gluonhq.emoji.test;
