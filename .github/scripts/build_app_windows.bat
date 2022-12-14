@@ -83,6 +83,7 @@ call "%JAVA_HOME%\bin\jlink" ^
 
 rem ------ PACKAGING ----------------------------------------------------------
 rem In the end we will find the package inside the target/installer directory.
+rem uuid generated from UUID.nameUUIDFromBytes("Gluon WaveApp".getBytes(StandardCharsets.UTF_8))
 
 echo Creating installer
 
@@ -95,11 +96,14 @@ call "%JAVA_HOME%\bin\jpackage" ^
   --main-jar %MAIN_JAR% ^
   --java-options -Xmx2048m ^
   --runtime-image App/target/java-runtime ^
+  --resource-dir .github/scripts/resources ^
   --icon %ICON_PATH% ^
   --app-version %APP_VERSION% ^
   --vendor "Gluon" ^
   --copyright "Copyright © 2021 Gluon" ^
+  --win-upgrade-uuid 35420d79-b0c3-35ed-99dc-36c35d575c5a ^
   --win-dir-chooser ^
   --win-shortcut ^
   --win-per-user-install ^
-  --win-menu
+  --win-menu ^
+  --verbose

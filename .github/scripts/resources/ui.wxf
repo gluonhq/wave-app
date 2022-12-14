@@ -1,0 +1,33 @@
+<?xml version="1.0" ?>
+<Wix xmlns="http://schemas.microsoft.com/wix/2006/wi" xmlns:util="http://schemas.microsoft.com/wix/UtilExtension">
+  <Fragment>
+    <Property Id="WIXUI_INSTALLDIR" Value="INSTALLDIR"></Property>
+
+    <!--  Read the registry to find an earlier version -->
+    <!-- https://www.firegiant.com/wix/tutorial/getting-started/where-to-install/ -->
+    <Property Id="CHECKREGISTRY">
+        <RegistrySearch Id='WaveAppRegistry' Type='raw' Root='HKCU' Key='SOFTWARE\Gluon\WaveApp' Name='InstallDir' />
+    </Property>
+
+    <UI Id="JpUI">
+      <UIRef Id="WixUI_InstallDir"></UIRef>
+      <DialogRef Id="InstallDirNotEmptyDlg"></DialogRef>
+
+      <!--
+        If CHECKREGISTRY is found, don't show InstallDirDlg.
+        Go directly from WelcomeDlg to VerifyReadyDlg.
+      -->
+      <Publish Dialog="WelcomeDlg" Control="Next" Event="NewDialog" Value="InstallDirDlg" Order="2">Not CHECKREGISTRY</Publish>
+      <Publish Dialog="InstallDirDlg" Control="Back" Event="NewDialog" Value="WelcomeDlg" Order="2">Not CHECKREGISTRY</Publish>
+
+      <Publish Dialog="WelcomeDlg" Control="Next" Event="NewDialog" Value="VerifyReadyDlg" Order="2">CHECKREGISTRY</Publish>
+      <Publish Dialog="VerifyReadyDlg" Control="Back" Event="NewDialog" Value="WelcomeDlg" Order="2">CHECKREGISTRY</Publish>
+
+      <!-- Launch Application after Finish is pressed -->
+      <Publish Dialog="ExitDialog"
+          Control="Finish"
+          Event="DoAction"
+          Value="LaunchApplication">NOT Installed</Publish>
+    </UI>
+  </Fragment>
+</Wix>
