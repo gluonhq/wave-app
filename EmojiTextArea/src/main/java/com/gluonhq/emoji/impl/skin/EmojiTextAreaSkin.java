@@ -4,6 +4,7 @@ package com.gluonhq.emoji.impl.skin;
 import com.gluonhq.emoji.Emoji;
 import com.gluonhq.emoji.EmojiData;
 import com.gluonhq.emoji.control.EmojiTextArea;
+import com.gluonhq.emoji.event.EmojiEvent;
 import com.gluonhq.emoji.popup.EmojiPopOver;
 import com.gluonhq.emoji.util.TextUtils;
 import javafx.application.Platform;
@@ -60,7 +61,7 @@ import static com.gluonhq.emoji.control.EmojiTextArea.Side.LEFT;
 
 public class EmojiTextAreaSkin extends SkinBase<EmojiTextArea> {
 
-    private final EmojiPopOver popOver;
+    private final PopOver popOver;
     private final Button emojiButton;
     private final EmojiSuggestion emojiSuggestion;
     private final EmojiStyledTextArea textarea;
@@ -110,16 +111,12 @@ public class EmojiTextAreaSkin extends SkinBase<EmojiTextArea> {
             }
         });
 
-        popOver = new EmojiPopOver();
-        // TODO: Find a way to perform this elegantly
-        popOver.setOnAction(e -> {
-            textarea.replaceSelection(getStyledDocumentFromEmoji((Emoji) e.getSource()));
-            textarea.requestFocus();
-        });
+        popOver = getSkinnable().getEmojiPopOver();
+        getSkinnable().emojiPopOverProperty().addListener((obs, ov, nv) -> setupPopover());
+        setupPopover();
+
         updateSide();
         getSkinnable().emojiSideProperty().addListener(o -> updateSide());
-        popOver.setSkinTone(getSkinnable().getSkinTone());
-        getSkinnable().skinToneProperty().bindBidirectional(popOver.skinToneProperty());
 
         emojiButton = new Button(EmojiData.emojiForText("smile"));
         emojiButton.getStyleClass().add("emoji-button");
@@ -210,6 +207,23 @@ public class EmojiTextAreaSkin extends SkinBase<EmojiTextArea> {
         } else {
             popOver.setArrowLocation(PopOver.ArrowLocation.BOTTOM_RIGHT);
         }
+    }
+
+    private void setupPopover() {
+        if (popOver instanceof EmojiPopOver) {
+            EmojiPopOver emojiPopOver = (EmojiPopOver) popOver;
+            emojiPopOver.setOnAction(e -> onEmojiAction((Emoji) e.getSource()));
+            emojiPopOver.skinToneProperty().unbind();
+            emojiPopOver.setSkinTone(getSkinnable().getSkinTone());
+            getSkinnable().skinToneProperty().bindBidirectional(emojiPopOver.skinToneProperty());
+        } else {
+            popOver.addEventHandler(EmojiEvent.ANY, e -> onEmojiAction(((EmojiEvent) e).getEmoji()));
+        }
+    }
+
+    private void onEmojiAction(Emoji emoji) {
+        textarea.replaceSelection(getStyledDocumentFromEmoji(emoji));
+        textarea.requestFocus();
     }
 
     @Override
