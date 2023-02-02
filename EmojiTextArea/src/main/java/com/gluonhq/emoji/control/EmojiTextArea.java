@@ -2,6 +2,7 @@ package com.gluonhq.emoji.control;
 
 import com.gluonhq.emoji.action.ActionFactory;
 import com.gluonhq.emoji.impl.skin.EmojiTextAreaSkin;
+import com.gluonhq.emoji.popup.EmojiPopOver;
 import com.gluonhq.emoji.popup.EmojiSkinTone;
 import javafx.beans.property.ObjectProperty;
 import javafx.beans.property.ReadOnlyIntegerProperty;
@@ -14,6 +15,7 @@ import javafx.event.EventHandler;
 import javafx.scene.control.Control;
 import javafx.scene.control.IndexRange;
 import javafx.scene.control.Skin;
+import org.controlsfx.control.PopOver;
 
 public class EmojiTextArea extends Control {
 
@@ -85,6 +87,23 @@ public class EmojiTextArea extends Control {
 
     public final void setOnAction(EventHandler<ActionEvent> value) {
         onAction.set(value);
+    }
+
+    /**
+     * Defines the PopOver control that will be displayed to allow adding emojis to the text area editor.
+     * By default, an EmojiPopOver is used, but any other PopOver implementation can be used.
+     * Third party implementations are responsible for triggering an EmojiEvent when a selection of an
+     * emoji is done, so it can be added to the text area editor.
+     */
+    private final ObjectProperty<PopOver> emojiPopOverProperty = new SimpleObjectProperty<>(this, "emojiPopOver");
+    public final ObjectProperty<PopOver> emojiPopOverProperty() {
+        return emojiPopOverProperty;
+    }
+    public final PopOver getEmojiPopOver() {
+        return emojiPopOverProperty.get();
+    }
+    public final void setEmojiPopOver(PopOver value) {
+        emojiPopOverProperty.set(value);
     }
 
     public ActionFactory getActionFactory() {
